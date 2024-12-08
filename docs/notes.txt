@@ -1,0 +1,24 @@
+1. Comparing Indian teams 1 to 6, 7 to 15 & 16 to 20 overs statistics to other teams (Aus, Eng, SA, NZ, Pak, Ban, SL) Runs Scored, Wickets Lost, 4s/6s scored, Dot ball %, Average Team Runs, Average Wickets lost
+2. Same with Indian Bowling Runs conceded, Wickets taken, 4s/6s conceded, dot ball %, Average runs scored, Average wickets taken
+3. Pacers & Spinners contribution in the entire T20 match compared with other teams.  (Avg overs bowled per game, Average Runs given per game, Boundary conceded % & Average wickets taken, Average boundary scored /balls, Average wickets taken per balls)
+4. Graph representing batters Strike Rate with Average 
+5. Graph representing bowlers Strike Rate with Economy, also Strike rate to Boundary conceded % & this needs to be filtered out phase wise (1-6. 7-15, 16-20)
+
+
+
+- Player-stats
+- Team-stats
+- Match-stats
+- Over-by-over-stats
+- Phase-wise-stats
+- Batsman vs Bowler stats
+- Batsman vs Team stats
+- Bowler vs Team stats
+- Bowler vs Batsman stats
+- Batsman vs Batsman stats
+- Bowler vs Bowler stats
+- Team vs Team stats
+- Team @ Venue stats
+- Team @ Venue vs Team stats
+- Team @ Venue vs Team @ Venue stats
+- Spinners vs Pacers stats
