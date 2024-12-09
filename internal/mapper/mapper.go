@@ -425,11 +425,11 @@ func processPlayerStats(match models.Match, fileName string) {
 				// Calculate Extras for Bowler
 				if delivery.Extras != (models.Extras{}) {
 					if delivery.Extras.NoBall > 0 {
-						bowler.Extras += delivery.Runs.Total
-						bowlerRuns += delivery.Extras.NoBall
-					} else if delivery.Extras.Wides > 0 {
-						bowler.Extras += delivery.Runs.Total
+						bowler.Extras += delivery.Extras.NoBall
 						bowlerRuns += delivery.Runs.Total
+					} else if delivery.Extras.Wides > 0 {
+						bowler.Extras += delivery.Extras.Wides
+						bowlerRuns += delivery.Extras.Wides
 					}
 				}
 
@@ -448,10 +448,10 @@ func processPlayerStats(match models.Match, fileName string) {
 				batsman.Runs += delivery.Runs.Batter
 				if delivery.Extras.Wides == 0 {
 					batsman.Balls += 1
-				}
-
-				if delivery.Runs.Batter == 0 && delivery.Extras.Wides == 0 && delivery.Extras.NoBall == 0 {
-					batsman.Dots++
+					if delivery.Runs.Batter == 0 && delivery.Extras.NoBall == 0 &&
+						delivery.Extras.Byes == 0 && delivery.Extras.LegByes == 0 {
+						batsman.Dots++
+					}
 				}
 
 				// ==================== common calculations

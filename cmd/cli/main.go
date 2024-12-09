@@ -8,21 +8,16 @@ import (
 
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	"github.com/KunalDuran/duranz-stats/internal/mapper"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %s", err)
-	}
 
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASS")
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 
-	_, err = data.InitDB(dbHost, dbPort, dbUser, dbPass)
+	_, err := data.InitDB(dbHost, dbPort, dbUser, dbPass)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -40,14 +35,14 @@ func main() {
 		data.Setup("duranz")
 	case "delete":
 		data.Delete()
-	case "venue", "team", "player", "match":
-		process(os.Args[2:])
+	case "venue", "team", "player", "match", "matchstats", "playerstats":
+		process(command, os.Args[2:])
 	default:
 		fmt.Println("Unknown command:", command)
 	}
 }
 
-func process(args []string) {
+func process(cmd string, args []string) {
 	var leagueFormat string
 	var fileName string
 
@@ -68,6 +63,6 @@ func process(args []string) {
 		fmt.Println("Processing file:", fileName)
 	}
 
-	mapper.RunAllProcess("", fileName)
+	mapper.RunAllProcess(cmd, fileName)
 
 }

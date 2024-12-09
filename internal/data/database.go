@@ -23,6 +23,7 @@ func InitDB(host, port, user, password string) (*sql.DB, error) {
 	if err = Db.Ping(); err != nil {
 		return nil, err
 	}
+	Db = SportsDb
 	return SportsDb, nil
 }
 
