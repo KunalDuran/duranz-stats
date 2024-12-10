@@ -12,10 +12,14 @@ import (
 
 func main() {
 
-	dbUser := os.Getenv("DB_USER")
-	dbPass := os.Getenv("DB_PASS")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
+	// dbUser := os.Getenv("DB_USER")
+	// dbPass := os.Getenv("DB_PASS")
+	// dbHost := os.Getenv("DB_HOST")
+	// dbPort := os.Getenv("DB_PORT")
+	dbHost := "localhost"
+	dbPort := "3306"
+	dbUser := "root"
+	dbPass := "password"
 
 	_, err := data.InitDB(dbHost, dbPort, dbUser, dbPass)
 	if err != nil {
@@ -34,8 +38,8 @@ func main() {
 	case "setup":
 		data.Setup("duranz")
 	case "delete":
-		data.Delete()
-	case "venue", "team", "player", "match", "matchstats", "playerstats":
+		data.DeleteAllTableData()
+	case "venue", "team", "player", "match", "matchstats", "playerstats", "all":
 		process(command, os.Args[2:])
 	default:
 		fmt.Println("Unknown command:", command)

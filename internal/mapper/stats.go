@@ -16,7 +16,7 @@ func VenueMapper(venueName, city string) {
 		return
 	}
 
-	sqlStr := `INSERT INTO duranz_venue(venue, city) VALUES(? , ?)`
+	sqlStr := `INSERT INTO venue(venue, city) VALUES(? , ?)`
 
 	_, err := data.Db.Exec(sqlStr, venueName, city)
 	if err != nil {
@@ -34,7 +34,7 @@ func TeamMapper(teams []string, teamType string) {
 			continue
 		}
 
-		sqlStr := `INSERT INTO duranz_teams(team_name, team_type) VALUES(? , ?)`
+		sqlStr := `INSERT INTO teams(team_name, team_type) VALUES(? , ?)`
 
 		_, err := data.Db.Exec(sqlStr, team, teamType)
 		if err != nil {
@@ -54,7 +54,7 @@ func PlayerMapper(players map[string]string) {
 	allPlayerStr := strings.Join(allTeamPlayers, "','")
 
 	// check for existing players
-	sqlStr := `SELECT player_name, cricsheet_id FROM duranz_cricket_players WHERE cricsheet_id IN ('` + allPlayerStr + `')`
+	sqlStr := `SELECT player_name, cricsheet_id FROM cricket_players WHERE cricsheet_id IN ('` + allPlayerStr + `')`
 	rows, err := data.Db.Query(sqlStr)
 	if err != nil && err != sql.ErrNoRows {
 		panic(err.Error())
@@ -87,7 +87,7 @@ func PlayerMapper(players map[string]string) {
 			valueStr = append(valueStr, `(?, ?)`)
 			valArgs = append(valArgs, playerName, playerID)
 		}
-		sqlStr := `INSERT INTO duranz_cricket_players(player_name, cricsheet_id) VALUES `
+		sqlStr := `INSERT INTO cricket_players(player_name, cricsheet_id) VALUES `
 
 		sqlStr = sqlStr + strings.Join(valueStr, ",")
 		_, err := data.Db.Exec(sqlStr, valArgs...)
@@ -191,7 +191,7 @@ func MatchMapper(match models.Match, fileName string) {
 	tvUmpires := strings.Join(match.Info.TvUmpires, ";")
 	umpires := strings.Join(match.Info.Umpires, ";")
 
-	sqlStr := `INSERT INTO duranz_cricket_matches(league_id, home_team_id, away_team_id, home_team_name, away_team_name, venue_id, match_date, match_date_multi, cricsheet_file_name,
+	sqlStr := `INSERT INTO cricket_matches(league_id, home_team_id, away_team_id, home_team_name, away_team_name, venue_id, match_date, match_date_multi, cricsheet_file_name,
 				result, man_of_the_match, toss_winner, toss_decision, winning_team, gender, 
 				match_refrees, reserve_umpires, tv_umpires, umpires) 
 				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`

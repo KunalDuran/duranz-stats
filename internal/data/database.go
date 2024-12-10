@@ -20,7 +20,7 @@ func InitDB(host, port, user, password string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = Db.Ping(); err != nil {
+	if err = SportsDb.Ping(); err != nil {
 		return nil, err
 	}
 	Db = SportsDb
@@ -59,7 +59,7 @@ func RequestAPIData(url string, headers map[string]string) ([]byte, int, error) 
 func GetPlayerDetails() []models.PlayerDetailsInt {
 	var objAllPlayer = []models.PlayerDetailsInt{}
 
-	sqlStr := `SELECT * FROM duranz_cricket_players WHERE 
+	sqlStr := `SELECT * FROM cricket_players WHERE 
 		(display_name IS NULL or display_name='') OR 
 		(first_name IS NULL or first_name='') OR
 		(last_name IS NULL or last_name='') OR
@@ -99,7 +99,7 @@ func GetPlayerDetails() []models.PlayerDetailsInt {
 func GetTeamDetails() []models.TeamDetailsInt {
 	var objAllTeams = []models.TeamDetailsInt{}
 
-	sqlStr := `SELECT * FROM duranz_teams`
+	sqlStr := `SELECT * FROM teams`
 
 	rows, err := Db.Query(sqlStr)
 	if err != nil {
@@ -133,7 +133,7 @@ func GetTeamDetails() []models.TeamDetailsInt {
 func GetVenueDetails() []models.VenueDetailsInt {
 	var objAllVenue = []models.VenueDetailsInt{}
 
-	sqlStr := `SELECT * FROM duranz_venue WHERE 
+	sqlStr := `SELECT * FROM venue WHERE 
 				(city IS NULL OR city='') OR (state IS NULL OR state='') OR (country IS NULL OR country='')`
 
 	rows, err := Db.Query(sqlStr)
@@ -174,7 +174,7 @@ func GetVenueDetails() []models.VenueDetailsInt {
 
 func InsertPlayerDetails(objPlayer models.PlayerDetailsExt) {
 
-	sqlStr := `INSERT INTO duranz_cricket_players(player_id,player_name,display_name,first_name,last_name,
+	sqlStr := `INSERT INTO cricket_players(player_id,player_name,display_name,first_name,last_name,
 		short_name,unique_short_name,dob,batting_style_1_id,bowling_style_1_id,is_overseas,cricsheet_id,
 		date_added,status)
 		VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -209,7 +209,7 @@ func InsertPlayerDetails(objPlayer models.PlayerDetailsExt) {
 
 func InsertTeamDetails(objTeam models.TeamDetailsExt) {
 
-	sqlStr := `INSERT INTO duranz_teams(
+	sqlStr := `INSERT INTO teams(
 		team_id,team_name,team_type,filtername,abbreviation,team_color,icon,url,jersey,flag,status,dateadded) 
 		VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
 		ON DUPLICATE KEY UPDATE 
@@ -240,7 +240,7 @@ func InsertTeamDetails(objTeam models.TeamDetailsExt) {
 
 func InsertVenueDetails(objVenue models.VenueDetailsExt) {
 
-	sqlStr := `INSERT INTO duranz_venue (
+	sqlStr := `INSERT INTO venue (
 		venue_id,venue,filtername,friendlyname,city,country,state,state_abbr,official_team,capacity,
 		dimensions,opened,description,shortname,timezone,weather,pitch_type,dateadded,status)
 	 	VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -332,9 +332,9 @@ func GetPlayerStats(playerName, league, season string, vsTeam int) map[string][]
     pms.team_id                ,
     pms.triples                ,
     pms.wickets_taken  
-	FROM duranz_cricket_players as player
-	LEFT JOIN duranz_player_match_stats AS pms ON pms.player_id = player.player_id 
-	LEFT JOIN duranz_cricket_matches matches ON matches.match_id = pms.match_id 
+	FROM cricket_players as player
+	LEFT JOIN player_match_stats AS pms ON pms.player_id = player.player_id 
+	LEFT JOIN cricket_matches matches ON matches.match_id = pms.match_id 
 	WHERE player_name = ? AND league_id= ? ` + seasonCond + vsTeamCond
 
 	rows, err := Db.Query(sqlStr, playerName, leagueID)
@@ -423,7 +423,7 @@ func GetTeamStats(teamID int, gender, season string) []models.DuranzMatchStats {
 	last_update,
 	match_end_time,
 	status
-	FROM duranz_cricket_matches
+	FROM cricket_matches
 	WHERE (home_team_id = ? OR away_team_id = ?) AND gender = ?`
 
 	rows, err := Db.Query(sqlStr, teamID, teamID, gender)
@@ -473,7 +473,7 @@ func GetTeamStats(teamID int, gender, season string) []models.DuranzMatchStats {
 
 func GetTeamIDByTeamName(teamName string) int {
 
-	sqlStr := `SELECT team_id FROM duranz_teams WHERE team_name = ?`
+	sqlStr := `SELECT team_id FROM teams WHERE team_name = ?`
 	var teamID int
 	row := Db.QueryRow(sqlStr, teamName)
 	err := row.Scan(&teamID)
@@ -484,7 +484,7 @@ func GetTeamIDByTeamName(teamName string) int {
 }
 
 func GetPlayerIDByPlayerName(playerName string) int {
-	sqlStr := `SELECT player_id FROM duranz_cricket_players WHERE player_name = ?`
+	sqlStr := `SELECT player_id FROM cricket_players WHERE player_name = ?`
 	var playerID int
 	row := Db.QueryRow(sqlStr, playerName)
 	err := row.Scan(&playerID)
@@ -514,8 +514,8 @@ func GetPlayerList(matchCount string) []string {
 		return playerList
 	}
 
-	sqlStr := `SELECT player_name FROM duranz_cricket_players WHERE player_id IN 
-	(SELECT player_id FROM duranz_player_match_stats GROUP BY player_id  HAVING COUNT(player_id) > ?)`
+	sqlStr := `SELECT player_name FROM cricket_players WHERE player_id IN 
+	(SELECT player_id FROM player_match_stats GROUP BY player_id  HAVING COUNT(player_id) > ?)`
 	rows, err := Db.Query(sqlStr, matchCount)
 	if err != nil {
 		panic(err)
@@ -559,7 +559,7 @@ func GetTeamList() []string {
 		return teamList
 	}
 
-	sqlStr := `SELECT team_name FROM duranz_teams`
+	sqlStr := `SELECT team_name FROM teams`
 	rows, err := Db.Query(sqlStr)
 	if err != nil {
 		panic(err)

@@ -18,7 +18,7 @@ import (
 // var PWD string
 var PWD, _ = os.Getwd()
 
-var DATASET_BASE = PWD + `/datasets/`
+var DATASET_BASE = PWD + `/datasets/odis_json/`
 
 var SLASH = `/`
 

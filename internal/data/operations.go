@@ -11,7 +11,7 @@ import (
 
 // InsertErrorLog : Insert All Error log record according to alert ID, file name
 func InsertErrorLog(alertid, errormsg, fileName string) {
-	sqlStr := `INSERT INTO duranz_errorlog (alert_id, error_msg, file_name) VALUES (?, ?, ?)`
+	sqlStr := `INSERT INTO errorlog (alert_id, error_msg, file_name) VALUES (?, ?, ?)`
 
 	_, err := Db.Exec(sqlStr, alertid, errormsg, fileName)
 	if err != nil {
@@ -40,7 +40,7 @@ var MappedVenues = map[string]string{}
 
 func InsertMatchStats(matchID int, objMatchStats models.MatchStats) {
 
-	sqlStr := `INSERT INTO duranz_match_stats(
+	sqlStr := `INSERT INTO match_stats(
 	match_id ,	
 	team_id, 
 	fall_of_wickets, 
@@ -70,7 +70,7 @@ func InsertMatchStats(matchID int, objMatchStats models.MatchStats) {
 
 func GetVenueID(venueName, city string) int {
 	var venueID int
-	sqlStr := `SELECT venue_id FROM duranz_venue WHERE venue = ? AND city = ?`
+	sqlStr := `SELECT venue_id FROM venue WHERE venue = ? AND city = ?`
 
 	err := Db.QueryRow(sqlStr, venueName, city).Scan(&venueID)
 	if err != nil && err != sql.ErrNoRows {
@@ -81,7 +81,7 @@ func GetVenueID(venueName, city string) int {
 
 func GetTeamID(teamName, team_type string) int {
 	var teamID int
-	sqlStr := `SELECT team_id FROM duranz_teams WHERE team_name = ? AND team_type = ?`
+	sqlStr := `SELECT team_id FROM teams WHERE team_name = ? AND team_type = ?`
 
 	err := Db.QueryRow(sqlStr, teamName, team_type).Scan(&teamID)
 	if err != nil && err != sql.ErrNoRows {
@@ -92,7 +92,7 @@ func GetTeamID(teamName, team_type string) int {
 
 func GetPlayerID(cricsheetID string) int {
 	var playerID int
-	sqlStr := `SELECT player_id FROM duranz_cricket_players WHERE cricsheet_id = ?`
+	sqlStr := `SELECT player_id FROM cricket_players WHERE cricsheet_id = ?`
 
 	err := Db.QueryRow(sqlStr, cricsheetID).Scan(&playerID)
 	if err != nil && err != sql.ErrNoRows {
@@ -117,7 +117,7 @@ func CheckTable(tableName, whereClause string) (int, error) {
 
 func GetMatchID(cricsheetID string) int {
 	var matchID int
-	sqlStr := `SELECT match_id FROM duranz_cricket_matches WHERE cricsheet_file_name = ?`
+	sqlStr := `SELECT match_id FROM cricket_matches WHERE cricsheet_file_name = ?`
 
 	err := Db.QueryRow(sqlStr, cricsheetID).Scan(&matchID)
 	if err != nil && err != sql.ErrNoRows {
@@ -127,7 +127,7 @@ func GetMatchID(cricsheetID string) int {
 }
 
 func InsertMappingInfo(fileName string, mappingInfo models.MappingInfo) {
-	sqlStr := `INSERT INTO duranz_file_mappings (file_name, league_id, teams, players, venue, matches, match_stats, player_stats) 
+	sqlStr := `INSERT INTO file_mappings (file_name, league_id, teams, players, venue, matches, match_stats, player_stats) 
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
 				ON DUPLICATE KEY UPDATE file_name=values(file_name), teams=values(teams), players=values(players), venue=values(venue), matches=values(matches), match_stats=values(match_stats), player_stats = values(player_stats)`
 
@@ -140,14 +140,14 @@ func InsertMappingInfo(fileName string, mappingInfo models.MappingInfo) {
 func DeleteAllTableData() {
 
 	tables := []string{
-		"duranz_errorlog",
-		"duranz_teams",
-		"duranz_venue",
-		"duranz_cricket_players",
-		"duranz_cricket_matches",
-		"duranz_match_stats",
-		"duranz_player_match_stats",
-		"duranz_file_mappings",
+		"errorlog",
+		"teams",
+		"venue",
+		"cricket_players",
+		"cricket_matches",
+		"match_stats",
+		"player_match_stats",
+		"file_mappings",
 	}
 
 	for _, table := range tables {
@@ -169,7 +169,7 @@ func GetMappingDetails() map[string]models.MappingInfo {
 
 	var objMappingInfo = map[string]models.MappingInfo{}
 
-	sqlStr := `SELECT file_name, league_id, teams, players, venue, matches, match_stats, player_stats FROM duranz_file_mappings`
+	sqlStr := `SELECT file_name, league_id, teams, players, venue, matches, match_stats, player_stats FROM file_mappings`
 	rows, err := Db.Query(sqlStr)
 	if err != nil {
 		panic(err)
@@ -203,7 +203,7 @@ func InsertPlayerStats(matchID, seasonID int, teamInningPlayerStats map[string]m
 
 	var valueStr []string
 	valArgs := []interface{}{}
-	sqlStr := `INSERT INTO duranz_player_match_stats(
+	sqlStr := `INSERT INTO player_match_stats(
 	match_id ,
 	season_id ,
 	innings_id ,
@@ -300,7 +300,7 @@ func PseudoCacheLayer(teamType string) {
 		teamType = "international"
 	}
 
-	sqlStr := `SELECT team_name FROM duranz_teams WHERE team_type = ?`
+	sqlStr := `SELECT team_name FROM teams WHERE team_type = ?`
 
 	rows, err := Db.Query(sqlStr, teamType)
 	if err != nil && err != sql.ErrNoRows {
@@ -316,7 +316,7 @@ func PseudoCacheLayer(teamType string) {
 	}
 
 	// load Venues
-	sqlStr = `SELECT venue, city FROM duranz_venue`
+	sqlStr = `SELECT venue, city FROM venue`
 
 	rows, err = Db.Query(sqlStr)
 	if err != nil && err != sql.ErrNoRows {
