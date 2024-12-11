@@ -1,10 +1,10 @@
 package mapper
 
 import (
-	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	"github.com/KunalDuran/duranz-stats/internal/models"
@@ -15,84 +15,72 @@ func VenueMapper(venueName, city string) {
 	if val, ok := data.MappedVenues[venueName]; ok && city == val {
 		return
 	}
+	venue := data.Venue{
+		VenueName: venueName,
+		City:      city,
+	}
 
-	sqlStr := `INSERT INTO venue(venue, city) VALUES(? , ?)`
-
-	_, err := data.Db.Exec(sqlStr, venueName, city)
-	if err != nil {
-		panic(err.Error())
+	result := data.DB.Create(&venue)
+	if result.Error != nil {
+		panic(result.Error)
 	}
 	data.MappedVenues[venueName] = city
-
 }
 
 func TeamMapper(teams []string, teamType string) {
-
 	for _, team := range teams {
-
 		if _, ok := data.MappedTeams[team]; ok {
 			continue
 		}
 
-		sqlStr := `INSERT INTO teams(team_name, team_type) VALUES(? , ?)`
+		teamObj := data.Team{
+			TeamName: team,
+			TeamType: teamType,
+		}
 
-		_, err := data.Db.Exec(sqlStr, team, teamType)
-		if err != nil {
-			panic(err.Error())
+		result := data.DB.Create(&teamObj)
+		if result.Error != nil {
+			panic(result.Error)
 		}
 		data.MappedTeams[team] = teamType
 	}
 }
 
 func PlayerMapper(players map[string]string) {
-
 	var allTeamPlayers []string
 	for _, playerID := range players {
 		allTeamPlayers = append(allTeamPlayers, playerID)
 	}
 
-	allPlayerStr := strings.Join(allTeamPlayers, "','")
-
-	// check for existing players
-	sqlStr := `SELECT player_name, cricsheet_id FROM cricket_players WHERE cricsheet_id IN ('` + allPlayerStr + `')`
-	rows, err := data.Db.Query(sqlStr)
-	if err != nil && err != sql.ErrNoRows {
-		panic(err.Error())
+	// Check existing players
+	var existingPlayers []data.CricketPlayer
+	result := data.DB.Where("cricsheet_id IN ?", allTeamPlayers).Find(&existingPlayers)
+	if result.Error != nil {
+		panic(result.Error)
 	}
 
-	existingPlayers := map[string]string{}
-	for rows.Next() {
-		var playerName, playerID string
-		err = rows.Scan(
-			&playerName,
-			&playerID,
-		)
-		if err != nil {
-			panic(err)
-		}
-		existingPlayers[playerID] = playerName
+	// Create map of existing player IDs
+	existingPlayerMap := make(map[string]string)
+	for _, player := range existingPlayers {
+		existingPlayerMap[player.CricsheetID] = player.PlayerName
 	}
 
-	playerToInsert := map[string]string{}
+	// Prepare new players for insertion
+	var newPlayers []data.CricketPlayer
 	for playerName, playerID := range players {
-		if _, ok := existingPlayers[playerID]; !ok {
-			playerToInsert[playerName] = playerID
+		if _, exists := existingPlayerMap[playerID]; !exists {
+			newPlayers = append(newPlayers, data.CricketPlayer{
+				PlayerName:  playerName,
+				CricsheetID: playerID,
+			})
 		}
 	}
 
-	if len(playerToInsert) > 0 {
-		var valueStr []string
-		valArgs := []interface{}{}
-		for playerName, playerID := range playerToInsert {
-			valueStr = append(valueStr, `(?, ?)`)
-			valArgs = append(valArgs, playerName, playerID)
-		}
-		sqlStr := `INSERT INTO cricket_players(player_name, cricsheet_id) VALUES `
-
-		sqlStr = sqlStr + strings.Join(valueStr, ",")
-		_, err := data.Db.Exec(sqlStr, valArgs...)
-		if err != nil {
-			panic(err)
+	// Batch insert new players
+	if len(newPlayers) > 0 {
+		result := data.DB.Create(&newPlayers)
+		if result.Error != nil {
+			panic(result.Error)
 		}
 	}
 }
@@ -100,16 +88,24 @@ func PlayerMapper(players map[string]string) {
 func MatchMapper(match models.Match, fileName string) {
 
 	fileName = strings.Replace(fileName, ".json", "", -1)
-	var matchDates, startDate string
-	leagueID := models.AllDuranzLeagues[match.Info.MatchType]
+	leagueID := models.AllDuranzLeagues[strings.ToLower(match.Info.MatchType)]
 
 	if match.Info.Event.Name == "Indian Premier League" {
 		leagueID = models.AllDuranzLeagues["ipl"]
 	}
 	venueID := data.GetVenueID(match.Info.Venue, match.Info.City)
+
+	var startDate string
+	var matchDate time.Time
+	var seasonID int
 	if len(match.Info.Dates) > 0 {
 		startDate = match.Info.Dates[0]
-		matchDates = strings.Join(match.Info.Dates, ";")
+		matchDate, err := time.Parse("2006-01-02", startDate)
+		if err != nil {
+			fmt.Println("Error in parsing match date", err)
+		}
+		seasonID = matchDate.Year()
+
 	}
 
 	if len(match.Info.Teams) != 2 || venueID == 0 || leagueID == 0 || startDate == "" {
@@ -134,7 +130,7 @@ func MatchMapper(match models.Match, fileName string) {
 	homeTeamID := data.GetTeamID(home, match.Info.TeamType)
 	awayTeamID := data.GetTeamID(away, match.Info.TeamType)
 
-	var winningTeam, ManOfTheMatch, tossWinner int
+	var winningTeam, tossWinner int
 	if home == match.Info.Outcome.Winner {
 		winningTeam = homeTeamID
 	} else if away == match.Info.Outcome.Winner {
@@ -149,11 +145,6 @@ func MatchMapper(match models.Match, fileName string) {
 		tossWinner = homeTeamID
 	} else if away == match.Info.Toss.Winner {
 		tossWinner = awayTeamID
-	}
-
-	if len(match.Info.PlayerOfMatch) > 0 {
-		peopleRegistery := match.Info.Register.People
-		ManOfTheMatch = data.GetPlayerID(peopleRegistery[match.Info.PlayerOfMatch[0]])
 	}
 
 	tossDecision := match.Info.Toss.Decision
@@ -191,14 +182,35 @@ func MatchMapper(match models.Match, fileName string) {
 	tvUmpires := strings.Join(match.Info.TvUmpires, ";")
 	umpires := strings.Join(match.Info.Umpires, ";")
 
-	sqlStr := `INSERT INTO cricket_matches(league_id, home_team_id, away_team_id, home_team_name, away_team_name, venue_id, match_date, match_date_multi, cricsheet_file_name,
-				result, man_of_the_match, toss_winner, toss_decision, winning_team, gender, 
-				match_refrees, reserve_umpires, tv_umpires, umpires) 
-				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	_, err := data.Db.Exec(sqlStr, leagueID, homeTeamID, awayTeamID, home, away, venueID, startDate,
-		matchDates, fileName, resultStr, ManOfTheMatch, tossWinner, tossDecision, winningTeam,
-		match.Info.Gender, matchReferees, reserveUmpires, tvUmpires, umpires)
-	if err != nil {
-		fmt.Println(err.Error())
+	cricketMatch := data.CricketMatch{
+		LeagueID:          &leagueID,
+		SeasonID:          &seasonID,
+		HomeTeamID:        &homeTeamID,
+		AwayTeamID:        &awayTeamID,
+		HomeTeamName:      home,
+		AwayTeamName:      away,
+		VenueID:           &venueID,
+		MatchDate:         &matchDate,
+		MatchDateMulti:    strings.Join(match.Info.Dates, ";"),
+		CricsheetFileName: fileName,
+		Result:            resultStr,
+		TossWinner:        &tossWinner,
+		TossDecision:      tossDecision,
+		WinningTeam:       &winningTeam,
+		Gender:            match.Info.Gender,
+		MatchRefrees:      matchReferees,
+		ReserveUmpires:    reserveUmpires,
+		TVUmpires:         tvUmpires,
+		Umpires:           umpires,
+	}
+
+	if len(match.Info.PlayerOfMatch) > 0 {
+		peopleRegistry := match.Info.Register.People
+		cricketMatch.ManOfTheMatch = data.GetPlayerID(peopleRegistry[match.Info.PlayerOfMatch[0]])
+	}
+
+	result := data.DB.Create(&cricketMatch)
+	if result.Error != nil {
+		fmt.Println(result.Error)
 	}
 }

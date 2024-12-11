@@ -1,20 +1,23 @@
 package data
 
 import (
-	"database/sql"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/KunalDuran/duranz-stats/internal/models"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // InsertErrorLog : Insert All Error log record according to alert ID, file name
 func InsertErrorLog(alertid, errormsg, fileName string) {
-	sqlStr := `INSERT INTO errorlog (alert_id, error_msg, file_name) VALUES (?, ?, ?)`
+	errorLog := ErrorLog{
+		AlertID:  alertid,
+		ErrorMsg: errormsg,
+		FileName: fileName,
+	}
 
-	_, err := Db.Exec(sqlStr, alertid, errormsg, fileName)
-	if err != nil {
+	if err := DB.Create(&errorLog).Error; err != nil {
 		panic(err)
 	}
 }
@@ -39,295 +42,193 @@ var MappedTeams = map[string]string{}
 var MappedVenues = map[string]string{}
 
 func InsertMatchStats(matchID int, objMatchStats models.MatchStats) {
+	matchStats := MatchStats{
+		MatchID:       matchID,
+		TeamID:        objMatchStats.TeamID,
+		FallOfWickets: objMatchStats.FOW,
+		Extras:        &objMatchStats.Extras,
+		Score:         &objMatchStats.Score,
+		SuperOver:     objMatchStats.SuperOver,
+		Wickets:       &objMatchStats.Wickets,
+		OversPlayed:   objMatchStats.OversPlayed,
+		Innings:       objMatchStats.InningsID,
+	}
 
-	sqlStr := `INSERT INTO match_stats(
-	match_id ,	
-	team_id, 
-	fall_of_wickets, 
-	extras, 
-	score, 
-	super_over,  
-	wickets, 
-	overs_played, 
-	innings
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-
-	_, err := Db.Exec(sqlStr,
-		matchID,
-		objMatchStats.TeamID,
-		objMatchStats.FOW,
-		objMatchStats.Extras,
-		objMatchStats.Score,
-		objMatchStats.SuperOver,
-		objMatchStats.Wickets,
-		objMatchStats.OversPlayed,
-		objMatchStats.InningsID,
-	)
-	if err != nil {
+	if err := DB.Create(&matchStats).Error; err != nil {
 		panic(err)
 	}
 }
 
 func GetVenueID(venueName, city string) int {
-	var venueID int
-	sqlStr := `SELECT venue_id FROM venue WHERE venue = ? AND city = ?`
-
-	err := Db.QueryRow(sqlStr, venueName, city).Scan(&venueID)
-	if err != nil && err != sql.ErrNoRows {
-		panic(err)
+	var venue Venue
+	if err := DB.Select("venue_id").Where("venue_name = ? AND city = ?", venueName, city).First(&venue).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+		return 0
 	}
-	return venueID
+	return venue.VenueID
 }
 
-func GetTeamID(teamName, team_type string) int {
-	var teamID int
-	sqlStr := `SELECT team_id FROM teams WHERE team_name = ? AND team_type = ?`
-
-	err := Db.QueryRow(sqlStr, teamName, team_type).Scan(&teamID)
-	if err != nil && err != sql.ErrNoRows {
-		panic(err)
+func GetTeamID(teamName, teamType string) int {
+	var team Team
+	if err := DB.Select("team_id").Where("team_name = ? AND team_type = ?", teamName, teamType).First(&team).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+		return 0
 	}
-	return teamID
+	return team.TeamID
 }
 
 func GetPlayerID(cricsheetID string) int {
-	var playerID int
-	sqlStr := `SELECT player_id FROM cricket_players WHERE cricsheet_id = ?`
-
-	err := Db.QueryRow(sqlStr, cricsheetID).Scan(&playerID)
-	if err != nil && err != sql.ErrNoRows {
-		panic(err)
+	var player CricketPlayer
+	if err := DB.Select("player_id").Where("cricsheet_id = ?", cricsheetID).First(&player).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+		return 0
 	}
-	return playerID
-}
-
-func CheckTable(tableName, whereClause string) (int, error) {
-	var countVal int
-	// sqlCheck := `SELECT COUNT(1) FROM ? WHERE ?`
-	sqlCheck := `SELECT COUNT(1) FROM ` + tableName + ` WHERE ` + whereClause
-	// err := data.Db.QueryRow(sqlCheck, tableName, whereClause).Scan(&countVal)
-	// fmt.Println(sqlCheck)
-	err := Db.QueryRow(sqlCheck).Scan(&countVal)
-	if err != nil {
-		return countVal, err
-	}
-
-	return countVal, nil
+	return player.PlayerID
 }
 
 func GetMatchID(cricsheetID string) int {
-	var matchID int
-	sqlStr := `SELECT match_id FROM cricket_matches WHERE cricsheet_file_name = ?`
-
-	err := Db.QueryRow(sqlStr, cricsheetID).Scan(&matchID)
-	if err != nil && err != sql.ErrNoRows {
-		panic(err)
+	var match CricketMatch
+	if err := DB.Select("match_id").Where("cricsheet_file_name = ?", cricsheetID).First(&match).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+		return 0
 	}
-	return matchID
+	return match.MatchID
 }
 
 func InsertMappingInfo(fileName string, mappingInfo models.MappingInfo) {
-	sqlStr := `INSERT INTO file_mappings (file_name, league_id, teams, players, venue, matches, match_stats, player_stats) 
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
-				ON DUPLICATE KEY UPDATE file_name=values(file_name), teams=values(teams), players=values(players), venue=values(venue), matches=values(matches), match_stats=values(match_stats), player_stats = values(player_stats)`
+	fileMapping := FileMapping{
+		FileName:    fileName,
+		LeagueID:    &mappingInfo.LeagueID,
+		Teams:       mappingInfo.Teams,
+		Players:     mappingInfo.Players,
+		Venue:       mappingInfo.Venue,
+		Matches:     mappingInfo.Match,
+		MatchStats:  mappingInfo.MatchStats,
+		PlayerStats: mappingInfo.PlayerStats,
+	}
 
-	_, err := Db.Exec(sqlStr, fileName, mappingInfo.LeagueID, mappingInfo.Teams, mappingInfo.Players, mappingInfo.Venue, mappingInfo.Match, mappingInfo.MatchStats, mappingInfo.PlayerStats)
-	if err != nil {
+	if err := DB.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "file_name"}},
+		DoUpdates: clause.AssignmentColumns([]string{"teams", "players", "venue", "matches", "match_stats", "player_stats"}),
+	}).Create(&fileMapping).Error; err != nil {
 		panic(err)
 	}
 }
-
-func DeleteAllTableData() {
-
-	tables := []string{
-		"errorlog",
-		"teams",
-		"venue",
-		"cricket_players",
-		"cricket_matches",
-		"match_stats",
-		"player_match_stats",
-		"file_mappings",
-	}
-
-	for _, table := range tables {
-		sqlStr := `DELETE FROM ` + table
-		_, err := Db.Exec(sqlStr)
-		if err != nil {
-			panic(err)
-		}
-
-		sqlStr2 := `ALTER TABLE ` + table + ` AUTO_INCREMENT = 1`
-		_, err = Db.Exec(sqlStr2)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
 func GetMappingDetails() map[string]models.MappingInfo {
+	var fileMappings []FileMapping
+	objMappingInfo := map[string]models.MappingInfo{}
 
-	var objMappingInfo = map[string]models.MappingInfo{}
-
-	sqlStr := `SELECT file_name, league_id, teams, players, venue, matches, match_stats, player_stats FROM file_mappings`
-	rows, err := Db.Query(sqlStr)
-	if err != nil {
+	if err := DB.Find(&fileMappings).Error; err != nil {
 		panic(err)
 	}
 
-	for rows.Next() {
-		var mappingInfo models.MappingInfo
-		var fileName string
-		err := rows.Scan(
-			&fileName,
-			&mappingInfo.LeagueID,
-			&mappingInfo.Teams,
-			&mappingInfo.Players,
-			&mappingInfo.Venue,
-			&mappingInfo.Match,
-			&mappingInfo.MatchStats,
-			&mappingInfo.PlayerStats,
-		)
-
-		if err != nil {
-			panic(err)
+	for _, mapping := range fileMappings {
+		objMappingInfo[mapping.FileName] = models.MappingInfo{
+			LeagueID:    *mapping.LeagueID,
+			Teams:       mapping.Teams,
+			Players:     mapping.Players,
+			Venue:       mapping.Venue,
+			Match:       mapping.Matches,
+			MatchStats:  mapping.MatchStats,
+			PlayerStats: mapping.PlayerStats,
 		}
-
-		objMappingInfo[fileName] = mappingInfo
 	}
 
 	return objMappingInfo
 }
 
 func InsertPlayerStats(matchID, seasonID int, teamInningPlayerStats map[string]map[string]models.PlayerStats, allPlayerID map[string]int, innBatTeamMap map[int]int) {
+	var playerStats []PlayerMatchStats
 
-	var valueStr []string
-	valArgs := []interface{}{}
-	sqlStr := `INSERT INTO player_match_stats(
-	match_id ,
-	season_id ,
-	innings_id ,
-	team_id ,
-	player_id ,
-	batting_order ,
-	runs_scored ,
-	balls_faced ,
-	dot_balls_played ,
-	singles ,
-	doubles ,
-	triples ,
-	fours_hit ,
-	sixes_hit ,
-	out_type ,
-	out_bowler ,
-	out_fielder ,
-	is_batted ,
-	overs_bowled ,
-	runs_conceded ,
-	balls_bowled ,
-	dots_bowled ,
-	wickets_taken ,
-	fours_conceded ,
-	sixes_conceded ,
-	extras_conceded ,
-	maiden_over ,
-	bowling_order,
-	run_out ,
-	catches ,
-	stumpings
-) VALUES `
 	for teamID, allPlayerStats := range teamInningPlayerStats {
-		for _, playerStats := range allPlayerStats {
-			tempPlayerID := allPlayerID[playerStats.Name]
+		for _, stats := range allPlayerStats {
+			tempPlayerID := allPlayerID[stats.Name]
 			if tempPlayerID == 0 {
-				fmt.Println(playerStats.Name)
-				// continue
+				fmt.Println(stats.Name)
+				continue
 			}
+
 			teamIDint, _ := strconv.Atoi(teamID)
 			innID := innBatTeamMap[teamIDint]
-			playerStats.PlayerID = tempPlayerID
-			valueStr = append(valueStr, `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 
-			valArgs = append(valArgs,
-				matchID,
-				seasonID,
-				innID,
-				teamID,
-				playerStats.PlayerID,
-				playerStats.BattingOrder,
-				playerStats.RunsScored,
-				playerStats.BallsPlayed,
-				playerStats.DotsPlayed,
-				playerStats.Singles,
-				playerStats.Doubles,
-				playerStats.Triples,
-				playerStats.FoursHit,
-				playerStats.SixesHit,
-				playerStats.OutType,
-				playerStats.OutBowler,
-				playerStats.OutFielder,
-				playerStats.IsBatted,
-
-				playerStats.OversBowled,
-				playerStats.RunsConceded,
-				playerStats.BallsBowled,
-				playerStats.DotsBowled,
-				playerStats.WicketsTaken,
-				playerStats.FoursConceded,
-				playerStats.SixesConceded,
-				playerStats.ExtrasConceded,
-				playerStats.MaidenOvers,
-				playerStats.BowlingOrder,
-
-				playerStats.RunOuts,
-				playerStats.Catches,
-				playerStats.Stumpings,
-			)
-
+			playerStats = append(playerStats, PlayerMatchStats{
+				MatchID:        matchID,
+				SeasonID:       strconv.Itoa(seasonID),
+				InningsID:      strconv.Itoa(innID),
+				TeamID:         teamIDint,
+				PlayerID:       tempPlayerID,
+				BattingOrder:   &stats.BattingOrder,
+				RunsScored:     &stats.RunsScored,
+				BallsFaced:     &stats.BallsPlayed,
+				DotBallsPlayed: &stats.DotsPlayed,
+				Singles:        &stats.Singles,
+				Doubles:        &stats.Doubles,
+				Triples:        &stats.Triples,
+				FoursHit:       &stats.FoursHit,
+				SixesHit:       &stats.SixesHit,
+				OutType:        stats.OutType,
+				OutBowler:      stats.OutBowler,
+				OutFielder:     stats.OutFielder,
+				IsBatted:       stats.IsBatted,
+				OversBowled:    stats.OversBowled,
+				RunsConceded:   &stats.RunsConceded,
+				BallsBowled:    &stats.BallsBowled,
+				DotsBowled:     &stats.DotsBowled,
+				WicketsTaken:   &stats.WicketsTaken,
+				FoursConceded:  &stats.FoursConceded,
+				SixesConceded:  &stats.SixesConceded,
+				ExtrasConceded: &stats.ExtrasConceded,
+				MaidenOver:     &stats.MaidenOvers,
+				BowlingOrder:   &stats.BowlingOrder,
+				RunOut:         &stats.RunOuts,
+				Catches:        &stats.Catches,
+				Stumpings:      &stats.Stumpings,
+			})
 		}
 	}
 
-	sqlStr = sqlStr + strings.Join(valueStr, ",")
-	_, err := Db.Exec(sqlStr, valArgs...)
-	if err != nil {
-		panic(err)
+	// Batch insert all player stats
+	if len(playerStats) > 0 {
+		if err := DB.CreateInBatches(playerStats, 100).Error; err != nil {
+			panic(err)
+		}
 	}
 }
 
 func PseudoCacheLayer(teamType string) {
-	// load Teams
+	// Clear existing cache
+	MappedTeams = make(map[string]string)
+	MappedVenues = make(map[string]string)
+
+	// Load Teams
 	if teamType != "ipl" {
 		teamType = "international"
 	}
 
-	sqlStr := `SELECT team_name FROM teams WHERE team_type = ?`
-
-	rows, err := Db.Query(sqlStr, teamType)
-	if err != nil && err != sql.ErrNoRows {
+	var teams []Team
+	if err := DB.Select("team_name").Where("team_type = ?", teamType).Find(&teams).Error; err != nil {
 		panic(err)
 	}
-	for rows.Next() {
-		var teamName string
-		err = rows.Scan(&teamName)
-		if err != nil {
-			panic(err)
-		}
-		MappedTeams[teamName] = teamType
+
+	for _, team := range teams {
+		MappedTeams[team.TeamName] = teamType
 	}
 
-	// load Venues
-	sqlStr = `SELECT venue, city FROM venue`
-
-	rows, err = Db.Query(sqlStr)
-	if err != nil && err != sql.ErrNoRows {
+	// Load Venues
+	var venues []Venue
+	if err := DB.Select("venue_name, city").Find(&venues).Error; err != nil {
 		panic(err)
 	}
-	for rows.Next() {
-		var venue, city string
-		err = rows.Scan(&venue, &city)
-		if err != nil {
-			panic(err)
-		}
-		MappedVenues[venue] = city
+
+	for _, venue := range venues {
+		MappedVenues[venue.VenueName] = venue.City
 	}
 }

@@ -17,11 +17,12 @@ func main() {
 	// dbHost := os.Getenv("DB_HOST")
 	// dbPort := os.Getenv("DB_PORT")
 	dbHost := "localhost"
-	dbPort := "3306"
+	dbPort := 3306
 	dbUser := "root"
-	dbPass := "password"
+	dbName := "duranz"
+	dbPass := ""
 
-	_, err := data.InitDB(dbHost, dbPort, dbUser, dbPass)
+	err := data.InitDB(dbHost, dbUser, dbPass, dbName, dbPort)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -36,9 +37,9 @@ func main() {
 
 	switch command {
 	case "setup":
-		data.Setup("duranz")
+		data.CreateTables()
 	case "delete":
-		data.DeleteAllTableData()
+		data.TruncateTables()
 	case "venue", "team", "player", "match", "matchstats", "playerstats", "all":
 		process(command, os.Args[2:])
 	default:

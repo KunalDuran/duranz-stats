@@ -14,27 +14,9 @@ import (
 	"github.com/KunalDuran/duranz-stats/internal/models"
 )
 
-// var DATASET_BASE = `/home/kunalduran/Desktop/duranz_api/develop/datasets/`
-// var PWD string
 var PWD, _ = os.Getwd()
 
 var DATASET_BASE = PWD + `/datasets/odis_json/`
-
-var SLASH = `/`
-
-func Activate(processName, fileName string) {
-	switch processName {
-
-	case "initial":
-		data.CreateAllTables()
-
-	case "delete":
-		data.DeleteAllTableData()
-
-	case "all", "venue", "players", "teams", "match", "matchstats", "playerstats":
-		RunAllProcess(processName, fileName)
-	}
-}
 
 func RunAllProcess(process, fileName string) {
 
