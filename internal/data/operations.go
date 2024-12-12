@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/KunalDuran/duranz-stats/internal/models"
@@ -10,12 +11,15 @@ import (
 )
 
 // InsertErrorLog : Insert All Error log record according to alert ID, file name
-func InsertErrorLog(alertid, errormsg, fileName string) {
+func InsertErrorLog(alertid, errormsg, fileName, err string) {
 	errorLog := ErrorLog{
 		AlertID:  alertid,
+		Error:    err,
 		ErrorMsg: errormsg,
 		FileName: fileName,
 	}
+
+	log.Println(err)
 
 	if err := DB.Create(&errorLog).Error; err != nil {
 		panic(err)

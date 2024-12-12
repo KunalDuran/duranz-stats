@@ -1,8 +1,11 @@
 package mapper
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"math"
 	"os"
 	"strconv"
@@ -27,58 +30,69 @@ func RunAllProcess(process, fileName string) {
 		newFiles = GetNewFiles(allFiles)
 	}
 
+	var namesMap = map[string]string{}
+	if process == "all" || process == "player" {
+		in, err := os.ReadFile("docs/names.csv")
+		if err != nil {
+			log.Fatal(err)
+		}
+		r := csv.NewReader(strings.NewReader(string(in)))
+
+		for {
+			record, err := r.Read()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			namesMap[record[0]] = record[1]
+		}
+	}
+
+	// fmt.Println(namesMap)
+
 	for _, file := range newFiles {
 		var mappingInfo models.MappingInfo
 		match, err := GetCricsheetData(DATASET_BASE + file)
 		if err != nil {
-			fmt.Println(err.Error())
-			data.InsertErrorLog(data.CRICSHEET_FILE_ERROR, `Error in fetching file `, file)
+			data.InsertErrorLog(data.CRICSHEET_FILE_ERROR, `Error in fetching file `, file, err.Error())
 			return
 		}
 
 		mappingInfo.LeagueID = models.AllDuranzLeagues[match.Info.MatchType]
 
-		// fmt.Println(string(match.Info.Season))
 		if match.Info.TeamType == "club" && (match.Info.Event.Name == "Indian Premier League" || strings.ToLower(match.Info.Event.Name) == "ipl") {
 			match.Info.TeamType = "ipl"
 		}
 
 		if process == "venue" || process == "all" {
-			// Map the VENUES
 			VenueMapper(match.Info.Venue, match.Info.City)
 			mappingInfo.Venue = true
 		}
 
-		if process == "players" || process == "all" {
-			// Map the Players
-			PlayerMapper(match.Info.Register.People)
+		if process == "player" || process == "all" {
+			PlayerMapper(match.Info.Register.People, namesMap)
 			mappingInfo.Players = true
-
 		}
 
-		if process == "teams" || process == "all" {
-			// Map the Teams
+		if process == "team" || process == "all" {
 			TeamMapper(match.Info.Teams, match.Info.TeamType)
 			mappingInfo.Teams = true
-
 		}
 
 		if process == "match" || process == "all" {
-			// Map the matches
 			MatchMapper(match, file)
 			mappingInfo.Match = true
-
 		}
 
 		if process == "matchstats" || process == "all" {
-			// Map the match stats
 			processMatchStats(match, file)
 			mappingInfo.MatchStats = true
-
 		}
 
 		if process == "playerstats" || process == "all" {
-			// Map the player stats
 			processPlayerStats(match, file)
 			mappingInfo.PlayerStats = true
 		}
@@ -277,7 +291,7 @@ func processPlayerStats(match models.Match, fileName string) {
 	if len(match.Info.Dates) > 0 {
 		matchDate, err := time.Parse("2006-01-02", match.Info.Dates[0])
 		if err != nil {
-			data.InsertErrorLog(data.DATETIME_ERROR, `Error in parsing date`+match.Info.Dates[0], fileName)
+			data.InsertErrorLog(data.DATETIME_ERROR, `Error in parsing date`+match.Info.Dates[0], fileName, err.Error())
 			panic(err)
 		}
 		seasonID = matchDate.Year()
@@ -297,7 +311,7 @@ func processPlayerStats(match models.Match, fileName string) {
 		playerID := data.GetPlayerID(cricID)
 		if playerID == 0 {
 			// log error
-			data.InsertErrorLog(data.PLAYER_NOT_FOUND, `player not found`+player, fileName)
+			data.InsertErrorLog(data.PLAYER_NOT_FOUND, `player not found`+player, fileName, "")
 			hasErrors = true
 			fmt.Println("ID of this player is zero ", player)
 			continue
@@ -548,7 +562,7 @@ func processMatchStats(match models.Match, fileName string) {
 	cricSheetID := strings.Replace(fileName, ".json", "", -1)
 	matchID := data.GetMatchID(cricSheetID)
 	if matchID == 0 {
-		data.InsertErrorLog(data.MATCH_NOT_FOUND, `matchID not found `+cricSheetID, fileName)
+		data.InsertErrorLog(data.MATCH_NOT_FOUND, `matchID not found `+cricSheetID, fileName, "")
 		return
 	}
 

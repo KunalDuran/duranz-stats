@@ -46,7 +46,7 @@ func TeamMapper(teams []string, teamType string) {
 	}
 }
 
-func PlayerMapper(players map[string]string) {
+func PlayerMapper(players, alternateNames map[string]string) {
 	var allTeamPlayers []string
 	for _, playerID := range players {
 		allTeamPlayers = append(allTeamPlayers, playerID)
@@ -71,6 +71,7 @@ func PlayerMapper(players map[string]string) {
 		if _, exists := existingPlayerMap[playerID]; !exists {
 			newPlayers = append(newPlayers, data.CricketPlayer{
 				PlayerName:  playerName,
+				DisplayName: alternateNames[playerID],
 				CricsheetID: playerID,
 			})
 		}
@@ -111,16 +112,16 @@ func MatchMapper(match models.Match, fileName string) {
 	if len(match.Info.Teams) != 2 || venueID == 0 || leagueID == 0 || startDate == "" {
 		fmt.Println("Error in match mapper process")
 		if len(match.Info.Teams) != 2 {
-			data.InsertErrorLog(data.DATABASE_ERROR, `More than 2 teams`, fileName)
+			data.InsertErrorLog(data.DATABASE_ERROR, `More than 2 teams`, fileName, "")
 		}
 		if venueID == 0 {
-			data.InsertErrorLog(data.DATABASE_ERROR, `Venue not found `+match.Info.Venue, fileName)
+			data.InsertErrorLog(data.DATABASE_ERROR, `Venue not found `+match.Info.Venue, fileName, "")
 		}
 		if leagueID == 0 {
-			data.InsertErrorLog(data.LEAGUE_NOT_FOUND, `League not found `+match.Info.MatchType, fileName)
+			data.InsertErrorLog(data.LEAGUE_NOT_FOUND, `League not found `+match.Info.MatchType, fileName, "")
 		}
 		if startDate == "" {
-			data.InsertErrorLog(data.DATETIME_ERROR, `Start date not found`, fileName)
+			data.InsertErrorLog(data.DATETIME_ERROR, `Start date not found`, fileName, "")
 		}
 		return
 	}
@@ -152,7 +153,7 @@ func MatchMapper(match models.Match, fileName string) {
 	if tossWinner == 0 {
 		fmt.Println("Error in mapping match ", fileName)
 		fmt.Println("TossWinner ", tossWinner)
-		data.InsertErrorLog(data.DATABASE_ERROR, `Toss winner not found`, fileName)
+		data.InsertErrorLog(data.DATABASE_ERROR, `Toss winner not found`, fileName, "")
 		return
 	}
 

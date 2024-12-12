@@ -310,7 +310,6 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 
 	final := utils.JSONMessageWrappedObj(http.StatusOK, playerFinalAll)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
-
 }
 
 func TeamStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -368,7 +367,6 @@ func TeamStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	final := utils.JSONMessageWrappedObj(http.StatusOK, teamFinalAll)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
-
 }
 
 func BatsmanVSBowlerAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

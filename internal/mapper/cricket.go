@@ -13,7 +13,7 @@ func ListFiles(path string) []string {
 	files, err := os.ReadDir(path)
 	if err != nil {
 		fmt.Println(err)
-		data.InsertErrorLog(data.CRICSHEET_FILE_ERROR, `Error in ListFiles : `, path)
+		data.InsertErrorLog(data.CRICSHEET_FILE_ERROR, `Error in ListFiles : `, path, err.Error())
 		return []string{}
 	}
 

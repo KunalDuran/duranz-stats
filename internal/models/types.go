@@ -82,9 +82,6 @@ type FieldingStats struct {
 	Stumpings int
 }
 
-type TeamStats struct {
-}
-
 type MatchStats struct {
 	MatchID     int
 	TeamID      int
@@ -98,43 +95,10 @@ type MatchStats struct {
 	SuperOver   bool
 }
 
-type Venue struct {
-}
-
 type PlayerStatsBind struct {
 	Batting  map[string]BattingStats
 	Bowling  map[string]BowlingStats
 	Fielding map[string]FieldingStats
-}
-
-type Officials struct {
-	MatchReferees  []string `json:"match_referees"`
-	ReserveUmpires []string `json:"reserve_umpires"`
-	TvUmpires      []string `json:"tv_umpires"`
-	Umpires        []string `json:"umpires"`
-}
-
-type OverDetails struct {
-	Over       int `json:"over"`
-	Deliveries []struct {
-		Batter     string `json:"batter"`
-		Bowler     string `json:"bowler"`
-		Extras     `json:"extras"`
-		NonStriker string `json:"non_striker"`
-		Runs       struct {
-			Batter int `json:"batter"`
-			Extras int `json:"extras"`
-			Total  int `json:"total"`
-		} `json:"runs"`
-		Wickets []struct {
-			Kind      string `json:"kind"`
-			PlayerOut string `json:"player_out"`
-			Fielders  []struct {
-				Name       string `json:"name"`
-				Substitute bool   `json:"substitute"`
-			} `json:"fielders"`
-		}
-	} `json:"deliveries"`
 }
 
 type MappingInfo struct {

@@ -5,13 +5,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	"github.com/KunalDuran/duranz-stats/internal/mapper"
 )
 
 func main() {
-
+	start := time.Now()
+	defer func() {
+		fmt.Println("Time taken:", time.Since(start))
+	}()
 	// dbUser := os.Getenv("DB_USER")
 	// dbPass := os.Getenv("DB_PASS")
 	// dbHost := os.Getenv("DB_HOST")

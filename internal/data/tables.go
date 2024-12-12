@@ -148,6 +148,7 @@ type PlayerMatchStats struct {
 type ErrorLog struct {
 	ID        int       `gorm:"column:id;primaryKey;autoIncrement"`
 	AlertID   string    `gorm:"column:alert_id;unique"`
+	Error     string    `gorm:"column:error"`
 	ErrorMsg  string    `gorm:"column:error_msg"`
 	FileName  string    `gorm:"column:file_name"`
 	ErrorType string    `gorm:"column:error_type"`
