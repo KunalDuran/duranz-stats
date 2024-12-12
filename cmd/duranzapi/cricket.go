@@ -16,8 +16,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-var DATASET_BASE = "/home/kunalduran/Desktop/duranz_api/dev/all_json/"
-
 // GetCricsheetData : Reads the match json file
 func GetCricsheetData(f_path string) (models.Match, error) {
 	var matchData models.Match
@@ -199,6 +197,7 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	if playerName == "all" {
 		// do something
 	}
+
 	if bio != "true" {
 		bio = ""
 	}
@@ -214,57 +213,57 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 		var playerFinal models.PlayerStatsExt
 
 		// General Stats
-		playerFinal.TeamID = pstats[0].TeamID.Int64
-		playerFinal.PlayerID = pstats[0].PlayerID.Int64
+		playerFinal.TeamID = int64(pstats[0].TeamID)
+		playerFinal.PlayerID = int64(pstats[0].PlayerID)
 		playerFinal.PlayerName = pname
 
-		// playerFinal.InningsID += pstat.InningsID.Int64
-		// playerFinal.OutBowler += pstat.OutBowler.Int64
-		// playerFinal.OutFielder += pstat.OutFielder.Int64
-		// playerFinal.OutType += pstat.OutType.Int64
+		// playerFinal.InningsID += pstat.InningsID
+		// playerFinal.OutBowler += pstat.OutBowler
+		// playerFinal.OutFielder += pstat.OutFielder
+		// playerFinal.OutType += pstat.OutType
 		playerFinal.SeasonID = season
-		// playerFinal.SeasonType += pstat.SeasonType.Int64
+		// playerFinal.SeasonType += pstat.SeasonType
 
 		for _, pstat := range pstats {
 
 			// bind batting stats
-			playerFinal.Batting.BallsFaced += pstat.BallsFaced.Int64
-			// playerFinal.Batting.BattingOrder += pstat.BattingOrder.Int64
-			playerFinal.Batting.DotBallsPlayed += pstat.DotBallsPlayed.Int64
-			playerFinal.Batting.Doubles += pstat.Doubles.Int64
-			playerFinal.Batting.FoursHit += pstat.FoursHit.Int64
-			playerFinal.Batting.RunsScored += pstat.RunsScored.Int64
-			playerFinal.Batting.Singles += pstat.Singles.Int64
-			playerFinal.Batting.SixesHit += pstat.SixesHit.Int64
-			playerFinal.Batting.Triples += pstat.Triples.Int64
-			playerFinal.Batting.IsBatted += pstat.IsBatted.Int64
-			if pstat.RunsScored.Int64 >= 100 {
+			playerFinal.Batting.BallsFaced += *pstat.BallsFaced
+			// playerFinal.Batting.BattingOrder += *pstat.BattingOrder
+			playerFinal.Batting.DotBallsPlayed += *pstat.DotBallsPlayed
+			playerFinal.Batting.Doubles += *pstat.Doubles
+			playerFinal.Batting.FoursHit += *pstat.FoursHit
+			playerFinal.Batting.RunsScored += *pstat.RunsScored
+			playerFinal.Batting.Singles += *pstat.Singles
+			playerFinal.Batting.SixesHit += *pstat.SixesHit
+			playerFinal.Batting.Triples += *pstat.Triples
+			// playerFinal.Batting.IsBatted += *pstat.IsBatted
+			if *pstat.RunsScored >= 100 {
 				playerFinal.Batting.Hundreds++
-			} else if pstat.RunsScored.Int64 >= 50 {
+			} else if *pstat.RunsScored >= 50 {
 				playerFinal.Batting.Fifties++
 			}
-			if pstat.OutType.String == "not out" {
+			if pstat.OutType == "not out" {
 				playerFinal.Batting.NotOuts++
 			}
-			if pstat.RunsScored.Int64 == 0 && pstat.OutType.String != "not out" && pstat.OutType.String != "" {
+			if *pstat.RunsScored == 0 && pstat.OutType != "not out" && pstat.OutType != "" {
 				playerFinal.Batting.Ducks++
 			}
 
-			if pstat.RunsScored.Int64 > playerFinal.Batting.HighestScore {
-				playerFinal.Batting.HighestScore = pstat.RunsScored.Int64
+			if *pstat.RunsScored > playerFinal.Batting.HighestScore {
+				playerFinal.Batting.HighestScore = *pstat.RunsScored
 			}
 
 			// bind bowling stats
-			// playerFinal.Bowling.BowlingOrder += pstat.BowlingOrder.Int64
-			playerFinal.Bowling.DotsBowled += pstat.DotsBowled.Int64
-			playerFinal.Bowling.MaidenOver += pstat.MaidenOver.Int64
-			playerFinal.Bowling.BallsBowled += pstat.BallsBowled.Int64
-			playerFinal.Bowling.ExtrasConceded += pstat.ExtrasConceded.Int64
-			playerFinal.Bowling.FoursConceded += pstat.FoursConceded.Int64
-			playerFinal.Bowling.RunsConceded += pstat.RunsConceded.Int64
-			playerFinal.Bowling.SixesConceded += pstat.SixesConceded.Int64
-			playerFinal.Bowling.WicketsTaken += pstat.WicketsTaken.Int64
-			if pstat.WicketsTaken.Int64 >= 5 {
+			// playerFinal.Bowling.BowlingOrder += pstat.BowlingOrder
+			playerFinal.Bowling.DotsBowled += *pstat.DotsBowled
+			playerFinal.Bowling.MaidenOver += *pstat.MaidenOver
+			playerFinal.Bowling.BallsBowled += *pstat.BallsBowled
+			playerFinal.Bowling.ExtrasConceded += *pstat.ExtrasConceded
+			playerFinal.Bowling.FoursConceded += *pstat.FoursConceded
+			playerFinal.Bowling.RunsConceded += *pstat.RunsConceded
+			playerFinal.Bowling.SixesConceded += *pstat.SixesConceded
+			playerFinal.Bowling.WicketsTaken += *pstat.WicketsTaken
+			if *pstat.WicketsTaken >= 5 {
 				playerFinal.Bowling.Fifers++
 			}
 			if playerFinal.Bowling.BestBowling != "" {
@@ -272,19 +271,19 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 				wickets, runs := bowlingFigures[0], bowlingFigures[1]
 				wicketsInt, _ := strconv.ParseInt(wickets, 10, 64)
 				runsInt, _ := strconv.ParseInt(runs, 10, 64)
-				if wicketsInt < pstat.WicketsTaken.Int64 {
-					playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken.Int64) + "/" + fmt.Sprint(pstat.RunsConceded.Int64)
-				} else if wicketsInt == pstat.WicketsTaken.Int64 && runsInt > pstat.RunsConceded.Int64 {
-					playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken.Int64) + "/" + fmt.Sprint(pstat.RunsConceded.Int64)
+				if wicketsInt < int64(*pstat.WicketsTaken) {
+					playerFinal.Bowling.BestBowling = fmt.Sprint(*pstat.WicketsTaken) + "/" + fmt.Sprint(*pstat.RunsConceded)
+				} else if wicketsInt == int64(*pstat.WicketsTaken) && runsInt > int64(*pstat.RunsConceded) {
+					playerFinal.Bowling.BestBowling = fmt.Sprint(*pstat.WicketsTaken) + "/" + fmt.Sprint(*pstat.RunsConceded)
 				}
 			} else {
-				playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken.Int64) + "/" + fmt.Sprint(pstat.RunsConceded.Int64)
+				playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
 			}
 
 			// bind fieling stats
-			playerFinal.Fielding.Catches += pstat.Catches.Int64
-			playerFinal.Fielding.Stumpings += pstat.Stumpings.Int64
-			playerFinal.Fielding.RunOut += pstat.RunOut.Int64
+			playerFinal.Fielding.Catches += *pstat.Catches
+			playerFinal.Fielding.Stumpings += *pstat.Stumpings
+			playerFinal.Fielding.RunOut += *pstat.RunOut
 		}
 		if playerFinal.Bowling.BallsBowled > 0 {
 			playerFinal.Bowling.OversBowled = fmt.Sprint(playerFinal.Bowling.BallsBowled/6) + "." + fmt.Sprint(playerFinal.Bowling.BallsBowled%6)
@@ -381,6 +380,7 @@ func PlayerList(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	if matchCount == "" {
 		matchCount = "10"
 	}
+
 	playerList := data.GetPlayerList(matchCount)
 	final := utils.JSONMessageWrappedObj(http.StatusOK, playerList)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)

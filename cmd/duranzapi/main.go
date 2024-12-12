@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"runtime"
-	"strings"
 
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	_ "github.com/go-sql-driver/mysql"
@@ -14,33 +12,23 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+var PWD, _ = os.Getwd()
+
+var DATASET_BASE = PWD + `/datasets/odis_json/`
+
 func main() {
 
 	dbHost := "localhost"
-	dbPort := "3306"
+	dbPort := 3306
 	dbUser := "root"
-	dbPass := "password"
+	dbName := "duranz"
+	dbPass := ""
 	port := ":5000"
 
-	if runtime.GOOS == "windows" {
-		dbPass = ""
-		DATASET_BASE = `C:\Users\Kunal\Desktop\Duranz\duranz_api\matchdata\odis_json\`
-	}
-
-	var env = strings.ToLower(os.Getenv("Environment"))
-	if env == "production" {
-		dbUser = "kunal"
-		// port = ":80"
-		fmt.Println("working in Production")
-		DATASET_BASE = `/home/ubuntu/duranz/matchdata/`
-	} else if env == "development" {
-		fmt.Println("working in Development")
-	}
-
-	// Connect the database
-	_, err := data.InitDB(dbHost, dbPort, dbUser, dbPass)
+	err := data.InitDB(dbHost, dbUser, dbPass, dbName, dbPort)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
+		return
 	}
 
 	cacheDataHost := "localhost"

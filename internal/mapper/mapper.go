@@ -3,7 +3,6 @@ package mapper
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"strconv"
@@ -267,7 +266,7 @@ func processScoreCard() {
 		fmt.Println(err.Error())
 	}
 
-	ioutil.WriteFile(`C:\Users\Kunal\Desktop\Duranz\duranz_api\scoreCard.json`, strScoreCard, 0777)
+	os.WriteFile(`C:\Users\Kunal\Desktop\Duranz\duranz_api\scoreCard.json`, strScoreCard, 0777)
 }
 
 func processPlayerStats(match models.Match, fileName string) {
