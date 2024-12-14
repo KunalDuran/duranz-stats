@@ -1,11 +1,8 @@
 package mapper
 
 import (
-	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"math"
 	"os"
 	"strconv"
@@ -15,91 +12,6 @@ import (
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	"github.com/KunalDuran/duranz-stats/internal/models"
 )
-
-var PWD, _ = os.Getwd()
-
-var DATASET_BASE = PWD + `/datasets/odis_json/`
-
-func RunAllProcess(process, fileName string) {
-
-	var newFiles []string
-	if fileName != "" {
-		newFiles = append(newFiles, fileName)
-	} else {
-		allFiles := ListFiles(DATASET_BASE)
-		newFiles = GetNewFiles(allFiles)
-	}
-
-	var namesMap = map[string]string{}
-	if process == "all" || process == "player" {
-		in, err := os.ReadFile("docs/names.csv")
-		if err != nil {
-			log.Fatal(err)
-		}
-		r := csv.NewReader(strings.NewReader(string(in)))
-
-		for {
-			record, err := r.Read()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			namesMap[record[0]] = record[1]
-		}
-	}
-
-	// fmt.Println(namesMap)
-
-	for _, file := range newFiles {
-		var mappingInfo models.MappingInfo
-		match, err := GetCricsheetData(DATASET_BASE + file)
-		if err != nil {
-			data.InsertErrorLog(data.CRICSHEET_FILE_ERROR, `Error in fetching file `, file, err.Error())
-			return
-		}
-
-		mappingInfo.LeagueID = models.AllDuranzLeagues[match.Info.MatchType]
-
-		if match.Info.TeamType == "club" && (match.Info.Event.Name == "Indian Premier League" || strings.ToLower(match.Info.Event.Name) == "ipl") {
-			match.Info.TeamType = "ipl"
-		}
-
-		if process == "venue" || process == "all" {
-			VenueMapper(match.Info.Venue, match.Info.City)
-			mappingInfo.Venue = true
-		}
-
-		if process == "player" || process == "all" {
-			PlayerMapper(match.Info.Register.People, namesMap)
-			mappingInfo.Players = true
-		}
-
-		if process == "team" || process == "all" {
-			TeamMapper(match.Info.Teams, match.Info.TeamType)
-			mappingInfo.Teams = true
-		}
-
-		if process == "match" || process == "all" {
-			MatchMapper(match, file)
-			mappingInfo.Match = true
-		}
-
-		if process == "matchstats" || process == "all" {
-			processMatchStats(match, file)
-			mappingInfo.MatchStats = true
-		}
-
-		if process == "playerstats" || process == "all" {
-			processPlayerStats(match, file)
-			mappingInfo.PlayerStats = true
-		}
-
-		data.InsertMappingInfo(file, mappingInfo)
-	}
-}
 
 // GetCricsheetData : Reads the match json file
 func GetCricsheetData(f_path string) (models.Match, error) {
@@ -283,7 +195,7 @@ func processScoreCard() {
 	os.WriteFile(`C:\Users\Kunal\Desktop\Duranz\duranz_api\scoreCard.json`, strScoreCard, 0777)
 }
 
-func processPlayerStats(match models.Match, fileName string) {
+func ProcessPlayerStats(match models.Match, fileName string) {
 
 	var hasErrors bool
 	// extract year
@@ -556,7 +468,69 @@ func processPlayerStats(match models.Match, fileName string) {
 	}
 }
 
-func processMatchStats(match models.Match, fileName string) {
+func BindBattingPlayerStats(objPlayers map[string]models.PlayerStats, objBatsman map[string]models.BattingStats) map[string]models.PlayerStats {
+
+	if len(objPlayers) == 0 {
+		objPlayers = map[string]models.PlayerStats{}
+	}
+	for batsmanName, batsman := range objBatsman {
+		player := objPlayers[batsmanName]
+		player.Name = batsman.Name
+		player.BattingOrder = batsman.BattingOrder
+		player.RunsScored = batsman.Runs
+		player.BallsPlayed = batsman.Balls
+		player.Singles = batsman.Singles
+		player.Doubles = batsman.Doubles
+		player.Triples = batsman.Triples
+		player.FoursHit = batsman.Fours
+		player.SixesHit = batsman.Sixes
+		player.StrikeRate = batsman.StrikeRate
+		player.OutType = batsman.Out
+		player.OutBowler = batsman.OutBowler
+		player.OutFielder = batsman.OutFielder
+		player.DotsPlayed = batsman.Dots
+		player.NotOut = batsman.NotOut
+		player.IsBatted = batsman.IsBatted
+		objPlayers[batsmanName] = player
+	}
+	return objPlayers
+}
+
+func BindBowlingPlayerStats(objPlayers map[string]models.PlayerStats, objBowler map[string]models.BowlingStats, objFielder map[string]models.FieldingStats) map[string]models.PlayerStats {
+	if len(objPlayers) == 0 {
+		objPlayers = map[string]models.PlayerStats{}
+	}
+	for bowlerName, bowler := range objBowler {
+		player := objPlayers[bowlerName]
+		player.Name = bowler.Name
+		player.BowlingOrder = bowler.BowlingOrder
+		player.OversBowled = bowler.Overs
+		player.MaidenOvers = bowler.Maiden
+		player.RunsConceded = bowler.Runs
+		player.WicketsTaken = bowler.Wickets
+		player.Economy = bowler.Economy
+		player.BallsBowled = bowler.Balls
+		player.DotsBowled = bowler.Dots
+		player.FoursConceded = bowler.FoursConceded
+		player.SixesConceded = bowler.SixesConceded
+		player.ExtrasConceded = bowler.Extras
+		objPlayers[bowlerName] = player
+	}
+
+	for fielderName, fielder := range objFielder {
+		player := objPlayers[fielderName]
+		player.Name = fielder.Name
+		player.Catches = fielder.Catches
+		player.RunOuts = fielder.RunOuts
+		player.Stumpings = fielder.Stumpings
+		objPlayers[fielderName] = player
+
+	}
+
+	return objPlayers
+}
+
+func ProcessMatchStats(match models.Match, fileName string) {
 
 	var objMatchStats models.MatchStats
 	cricSheetID := strings.Replace(fileName, ".json", "", -1)
@@ -639,5 +613,211 @@ func processMatchStats(match models.Match, fileName string) {
 		objMatchStats.TeamID = tempTeamID
 
 		data.InsertMatchStats(matchID, objMatchStats)
+	}
+}
+
+func VenueMapper(venueName, city string) {
+
+	if val, ok := data.MappedVenues[venueName]; ok && city == val {
+		return
+	}
+	venue := data.Venue{
+		VenueName: venueName,
+		City:      city,
+	}
+
+	result := data.DB.Create(&venue)
+	if result.Error != nil {
+		panic(result.Error)
+	}
+	data.MappedVenues[venueName] = city
+}
+
+func TeamMapper(teams []string, teamType string) {
+	for _, team := range teams {
+		if _, ok := data.MappedTeams[team]; ok {
+			continue
+		}
+
+		teamObj := data.Team{
+			TeamName: team,
+			TeamType: teamType,
+		}
+
+		result := data.DB.Create(&teamObj)
+		if result.Error != nil {
+			panic(result.Error)
+		}
+		data.MappedTeams[team] = teamType
+	}
+}
+
+func PlayerMapper(players, alternateNames map[string]string) {
+	var allTeamPlayers []string
+	for _, playerID := range players {
+		allTeamPlayers = append(allTeamPlayers, playerID)
+	}
+
+	// Check existing players
+	var existingPlayers []data.CricketPlayer
+	result := data.DB.Where("cricsheet_id IN ?", allTeamPlayers).Find(&existingPlayers)
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
+	// Create map of existing player IDs
+	existingPlayerMap := make(map[string]string)
+	for _, player := range existingPlayers {
+		existingPlayerMap[player.CricsheetID] = player.PlayerName
+	}
+
+	// Prepare new players for insertion
+	var newPlayers []data.CricketPlayer
+	for playerName, playerID := range players {
+		if _, exists := existingPlayerMap[playerID]; !exists {
+			newPlayers = append(newPlayers, data.CricketPlayer{
+				PlayerName:  playerName,
+				DisplayName: alternateNames[playerID],
+				CricsheetID: playerID,
+			})
+		}
+	}
+
+	// Batch insert new players
+	if len(newPlayers) > 0 {
+		result := data.DB.Create(&newPlayers)
+		if result.Error != nil {
+			panic(result.Error)
+		}
+	}
+}
+
+func MatchMapper(match models.Match, fileName string) {
+
+	fileName = strings.Replace(fileName, ".json", "", -1)
+	leagueID := models.AllDuranzLeagues[strings.ToLower(match.Info.MatchType)]
+
+	if match.Info.Event.Name == "Indian Premier League" {
+		leagueID = models.AllDuranzLeagues["ipl"]
+	}
+	venueID := data.GetVenueID(match.Info.Venue, match.Info.City)
+
+	var startDate string
+	var matchDate time.Time
+	var seasonID int
+	if len(match.Info.Dates) > 0 {
+		startDate = match.Info.Dates[0]
+		matchDate, err := time.Parse("2006-01-02", startDate)
+		if err != nil {
+			fmt.Println("Error in parsing match date", err)
+		}
+		seasonID = matchDate.Year()
+
+	}
+
+	if len(match.Info.Teams) != 2 || venueID == 0 || leagueID == 0 || startDate == "" {
+		fmt.Println("Error in match mapper process")
+		if len(match.Info.Teams) != 2 {
+			data.InsertErrorLog(data.DATABASE_ERROR, `More than 2 teams`, fileName, "")
+		}
+		if venueID == 0 {
+			data.InsertErrorLog(data.DATABASE_ERROR, `Venue not found `+match.Info.Venue, fileName, "")
+		}
+		if leagueID == 0 {
+			data.InsertErrorLog(data.LEAGUE_NOT_FOUND, `League not found `+match.Info.MatchType, fileName, "")
+		}
+		if startDate == "" {
+			data.InsertErrorLog(data.DATETIME_ERROR, `Start date not found`, fileName, "")
+		}
+		return
+	}
+
+	home := match.Info.Teams[0]
+	away := match.Info.Teams[1]
+	homeTeamID := data.GetTeamID(home, match.Info.TeamType)
+	awayTeamID := data.GetTeamID(away, match.Info.TeamType)
+
+	var winningTeam, tossWinner int
+	if home == match.Info.Outcome.Winner {
+		winningTeam = homeTeamID
+	} else if away == match.Info.Outcome.Winner {
+		winningTeam = awayTeamID
+	} else if match.Info.Outcome.Eliminator == home {
+		winningTeam = homeTeamID
+	} else if match.Info.Outcome.Eliminator == away {
+		winningTeam = awayTeamID
+	}
+
+	if home == match.Info.Toss.Winner {
+		tossWinner = homeTeamID
+	} else if away == match.Info.Toss.Winner {
+		tossWinner = awayTeamID
+	}
+
+	tossDecision := match.Info.Toss.Decision
+
+	if tossWinner == 0 {
+		fmt.Println("Error in mapping match ", fileName)
+		fmt.Println("TossWinner ", tossWinner)
+		data.InsertErrorLog(data.DATABASE_ERROR, `Toss winner not found`, fileName, "")
+		return
+	}
+
+	var resultStr string
+	if match.Info.Outcome.Result == "no result" {
+		resultStr = "no result"
+	} else if match.Info.Outcome.Result == "tie" {
+		resultStr = "tie"
+	} else if match.Info.Outcome.Result == "draw" {
+		resultStr = "draw"
+	}
+
+	if resultStr != "no result" && resultStr != "tie" && resultStr != "draw" {
+		resultStr = match.Info.Outcome.Winner + " Won by "
+		if match.Info.Outcome.By.Runs > 0 {
+			resultStr += strconv.Itoa(match.Info.Outcome.By.Runs) + " Runs"
+		} else if match.Info.Outcome.By.Wickets > 0 {
+			resultStr += strconv.Itoa(match.Info.Outcome.By.Wickets) + " Wickets"
+		}
+	}
+	if match.Info.Outcome.Method == "D/L" {
+		resultStr += " (D/L Method)"
+	}
+
+	matchReferees := strings.Join(match.Info.MatchReferees, ";")
+	reserveUmpires := strings.Join(match.Info.ReserveUmpires, ";")
+	tvUmpires := strings.Join(match.Info.TvUmpires, ";")
+	umpires := strings.Join(match.Info.Umpires, ";")
+
+	cricketMatch := data.CricketMatch{
+		LeagueID:          &leagueID,
+		SeasonID:          &seasonID,
+		HomeTeamID:        &homeTeamID,
+		AwayTeamID:        &awayTeamID,
+		HomeTeamName:      home,
+		AwayTeamName:      away,
+		VenueID:           &venueID,
+		MatchDate:         &matchDate,
+		MatchDateMulti:    strings.Join(match.Info.Dates, ";"),
+		CricsheetFileName: fileName,
+		Result:            resultStr,
+		TossWinner:        &tossWinner,
+		TossDecision:      tossDecision,
+		WinningTeam:       &winningTeam,
+		Gender:            match.Info.Gender,
+		MatchRefrees:      matchReferees,
+		ReserveUmpires:    reserveUmpires,
+		TVUmpires:         tvUmpires,
+		Umpires:           umpires,
+	}
+
+	if len(match.Info.PlayerOfMatch) > 0 {
+		peopleRegistry := match.Info.Register.People
+		cricketMatch.ManOfTheMatch = data.GetPlayerID(peopleRegistry[match.Info.PlayerOfMatch[0]])
+	}
+
+	result := data.DB.Create(&cricketMatch)
+	if result.Error != nil {
+		fmt.Println(result.Error)
 	}
 }

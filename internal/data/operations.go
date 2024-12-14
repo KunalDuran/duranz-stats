@@ -26,14 +26,6 @@ func InsertErrorLog(alertid, errormsg, fileName, err string) {
 	}
 }
 
-var AllDuranzLeagues = map[string]int{
-	"ODI":                   1,
-	"Test":                  2,
-	"T20":                   3,
-	"ipl":                   4,
-	"Indian Premier League": 4,
-}
-
 var GamePath = map[string]string{
 	"odi":  "odis_json",
 	"test": "tests_json",
@@ -126,6 +118,7 @@ func InsertMappingInfo(fileName string, mappingInfo models.MappingInfo) {
 		panic(err)
 	}
 }
+
 func GetMappingDetails() map[string]models.MappingInfo {
 	var fileMappings []FileMapping
 	objMappingInfo := map[string]models.MappingInfo{}

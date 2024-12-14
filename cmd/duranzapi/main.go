@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/KunalDuran/duranz-stats/internal/cache"
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	_ "github.com/go-sql-driver/mysql"
 
@@ -31,11 +32,10 @@ func main() {
 		return
 	}
 
+	// Connect the cache server
 	cacheDataHost := "localhost"
 	cacheDataPort := "6379"
-
-	// Connect the cache server
-	err = data.InitRedis(cacheDataHost, cacheDataPort)
+	err = cache.InitRedis(cacheDataHost, cacheDataPort)
 	if err != nil {
 		log.Panic(err)
 	}

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/KunalDuran/duranz-stats/internal/data"
-	"github.com/KunalDuran/duranz-stats/internal/mapper"
 )
 
 func main() {
@@ -72,6 +71,8 @@ func process(cmd string, args []string) {
 		fmt.Println("Processing file:", fileName)
 	}
 
-	mapper.RunAllProcess(cmd, fileName)
+	DATASET_BASE = DATASET_BASE + data.GamePath[leagueFormat]
+
+	RunAllProcess(cmd, fileName)
 
 }
