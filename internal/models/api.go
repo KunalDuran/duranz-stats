@@ -110,16 +110,16 @@ type DuranzMatchStats struct {
 }
 
 type DuranzTeamStats struct {
-	TotalMatches    int     `json:"total_matches,omitempty"`
-	MatchWin        int     `json:"match_win,omitempty"`
-	MatchWinPercent float64 `json:"win_percent,omitempty"`
-	BatFirstWin     int     `json:"bat_first_win,omitempty"`
-	ChasingWin      int     `json:"chasing_win,omitempty"`
-	BatFirstWinPer  float64 `json:"bat_first_win_per,omitempty"`
-	ChasingWinPer   float64 `json:"chasing_win_per,omitempty"`
-	AvgScoreInn     float64 `json:"avg_score_inn,omitempty"`
-	HighestScore    int     `json:"highest_score,omitempty"`
-	LowestScore     int     `json:"lowest_score,omitempty"`
-	TossWin         float64 `json:"toss_win,omitempty"`
-	TossWinPercent  float64 `json:"toss_win_percent,omitempty"`
+	TotalMatches    int     `json:"total_matches"`
+	MatchWin        int     `json:"match_win"`
+	MatchWinPercent float64 `json:"win_percent"`
+	BatFirstWin     int     `json:"bat_first_win"`
+	ChasingWin      int     `json:"chasing_win"`
+	BatFirstWinPer  float64 `json:"bat_first_win_per"`
+	ChasingWinPer   float64 `json:"chasing_win_per"`
+	AvgScoreInn     float64 `json:"avg_score_inn"`
+	HighestScore    int     `json:"highest_score"`
+	LowestScore     int     `json:"lowest_score"`
+	TossWin         float64 `json:"toss_win"`
+	TossWinPercent  float64 `json:"toss_win_percent"`
 }

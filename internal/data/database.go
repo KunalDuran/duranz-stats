@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/KunalDuran/duranz-stats/internal/models"
@@ -46,11 +47,22 @@ func GetPlayerStats(playerName, league, season string, vsTeam int) map[string][]
 	return objAllPlayerStats
 }
 
-func GetTeamStats(teamID int, gender, season string) []models.DuranzMatchStats {
+func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []models.DuranzMatchStats {
 	var objAllTeamStats []models.DuranzMatchStats
 
+	queryString := "(home_team_id = ? OR away_team_id = ?) AND gender = ?"
+	if venue != "" {
+		venueID := GetVenueIDbyName(venue)
+		queryString += fmt.Sprintf(" AND venue_id = %d", venueID)
+	}
+
+	if vsTeam != "" {
+		vsTeamID := GetTeamIDByTeamName(vsTeam)
+		queryString += fmt.Sprintf(" AND away_team_id = %d", vsTeamID)
+	}
+
 	query := DB.Model(&CricketMatch{}).
-		Where("(home_team_id = ? OR away_team_id = ?) AND gender = ?",
+		Where(queryString,
 			teamID, teamID, gender)
 
 	if err := query.Find(&objAllTeamStats).Error; err != nil {

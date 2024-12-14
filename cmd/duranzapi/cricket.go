@@ -319,36 +319,38 @@ func TeamStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		gender = "male"
 	}
 	season := utils.CleanText(r.URL.Query().Get("season"), true)
+	venue := utils.CleanText(r.URL.Query().Get("venue"), true)
+	vsTeam := utils.CleanText(r.URL.Query().Get("vsteam"), true)
 
 	teamID := data.GetTeamIDByTeamName(teamName)
-	objAllTeamStats := data.GetTeamStats(teamID, gender, season)
-	var teamFinalAll models.DuranzTeamStats
+	objAllTeamStats := data.GetTeamStats(teamID, gender, season, venue, vsTeam)
+	var teamStatistics models.DuranzTeamStats
 
 	for _, objTeam := range objAllTeamStats {
 
 		if objTeam.TossWinner.Valid {
 			if objTeam.TossWinner.Int64 == int64(teamID) {
-				teamFinalAll.TossWin++
+				teamStatistics.TossWin++
 			}
 		}
 
 		if objTeam.WinningTeam.Valid {
 			if objTeam.WinningTeam.Int64 == int64(teamID) {
-				teamFinalAll.MatchWin++
+				teamStatistics.MatchWin++
 
 				// count if team won while batting first or chasing first
 				if objTeam.TossWinner.Valid {
 					if objTeam.TossWinner.Int64 == int64(teamID) { // team won the toss
 						if objTeam.TossDecision.String == "bat" {
-							teamFinalAll.BatFirstWin++
+							teamStatistics.BatFirstWin++
 						} else {
-							teamFinalAll.ChasingWin++
+							teamStatistics.ChasingWin++
 						}
 					} else {
 						if objTeam.TossDecision.String == "bat" { // other team won the toss
-							teamFinalAll.ChasingWin++
+							teamStatistics.ChasingWin++
 						} else {
-							teamFinalAll.BatFirstWin++
+							teamStatistics.BatFirstWin++
 						}
 					}
 				}
@@ -356,16 +358,21 @@ func TeamStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		}
 	}
 
-	teamFinalAll.TotalMatches = len(objAllTeamStats)
-	teamFinalAll.MatchWinPercent = utils.Round(float64(teamFinalAll.MatchWin)/float64(teamFinalAll.TotalMatches), 0.01, 2)
-	teamFinalAll.TossWinPercent = utils.Round(float64(teamFinalAll.TossWin)/float64(teamFinalAll.TotalMatches), 0.01, 2)
-	teamFinalAll.ChasingWinPer = math.Round((float64(teamFinalAll.ChasingWin)/float64(teamFinalAll.MatchWin))*10000) / 100
-	teamFinalAll.BatFirstWinPer = math.Round((float64(teamFinalAll.BatFirstWin)/float64(teamFinalAll.MatchWin))*10000) / 100
+	teamStatistics.TotalMatches = len(objAllTeamStats)
+	if teamStatistics.TotalMatches > 0 {
+		teamStatistics.MatchWinPercent = utils.Round(float64(teamStatistics.MatchWin)/float64(teamStatistics.TotalMatches), 0.01, 2) * 100
+		teamStatistics.TossWinPercent = utils.Round(float64(teamStatistics.TossWin)/float64(teamStatistics.TotalMatches), 0.01, 2) * 100
+	}
+
+	if teamStatistics.MatchWin > 0 {
+		teamStatistics.ChasingWinPer = math.Round((float64(teamStatistics.ChasingWin)/float64(teamStatistics.MatchWin))*10000) / 100
+		teamStatistics.BatFirstWinPer = math.Round((float64(teamStatistics.BatFirstWin)/float64(teamStatistics.MatchWin))*10000) / 100
+	}
 	//AvgScore /Inn
 	//Highest Score
 	//Lowest Score
 
-	final := utils.JSONMessageWrappedObj(http.StatusOK, teamFinalAll)
+	final := utils.JSONMessageWrappedObj(http.StatusOK, teamStatistics)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 

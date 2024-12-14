@@ -66,6 +66,16 @@ func GetVenueID(venueName, city string) int {
 	return venue.VenueID
 }
 
+func GetVenueIDbyName(venueName string) int {
+	var venue Venue
+	if err := DB.Select("venue_id").Where("venue_name = ?", venueName).First(&venue).Error; err != nil {
+		if err != gorm.ErrRecordNotFound {
+			panic(err)
+		}
+		return 0
+	}
+	return venue.VenueID
+}
 func GetTeamID(teamName, teamType string) int {
 	var team Team
 	if err := DB.Select("team_id").Where("team_name = ? AND team_type = ?", teamName, teamType).First(&team).Error; err != nil {
