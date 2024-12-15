@@ -277,7 +277,7 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 					playerFinal.Bowling.BestBowling = fmt.Sprint(*pstat.WicketsTaken) + "/" + fmt.Sprint(*pstat.RunsConceded)
 				}
 			} else {
-				playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
+				playerFinal.Bowling.BestBowling = fmt.Sprint(*pstat.WicketsTaken) + "/" + fmt.Sprint(*pstat.RunsConceded)
 			}
 
 			// bind fieling stats

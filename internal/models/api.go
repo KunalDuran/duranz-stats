@@ -16,65 +16,65 @@ type ScoreCard struct {
 }
 
 type PlayerStatsExt struct {
-	MatchID                int64  `json:"match_id,omitempty"`
-	InningsID              string `json:"innings_id,omitempty"`
-	SeasonID               string `json:"season_id,omitempty"`
-	SeasonType             string `json:"season_type,omitempty"`
-	PlayerID               int64  `json:"player_id,omitempty"`
-	PlayerName             string `json:"player_name,omitempty"`
-	TeamID                 int64  `json:"team_id,omitempty"`
-	LastUpdate             string `json:"last_update,omitempty"`
-	PlayedAbandonedMatches int64  `json:"played_abandoned_matches,omitempty"`
+	MatchID                int64  `json:"match_id"`
+	InningsID              string `json:"innings_id"`
+	SeasonID               string `json:"season_id"`
+	SeasonType             string `json:"season_type"`
+	PlayerID               int64  `json:"player_id"`
+	PlayerName             string `json:"player_name"`
+	TeamID                 int64  `json:"team_id"`
+	LastUpdate             string `json:"last_update"`
+	PlayedAbandonedMatches int64  `json:"played_abandoned_matches"`
 
-	Batting  PlayerBattingStats  `json:"batting,omitempty"`
-	Bowling  PlayerBowlingStats  `json:"bowling,omitempty"`
-	Fielding PlayerFieldingStats `json:"fielding,omitempty"`
+	Batting  PlayerBattingStats  `json:"batting"`
+	Bowling  PlayerBowlingStats  `json:"bowling"`
+	Fielding PlayerFieldingStats `json:"fielding"`
 }
 
 type PlayerBattingStats struct {
-	BallsFaced     int     `json:"balls_faced,omitempty"`
-	BattingOrder   int     `json:"batting_order,omitempty"`
-	DotBallsPlayed int     `json:"dot_balls_played,omitempty"`
-	Doubles        int     `json:"doubles,omitempty"`
-	FoursHit       int     `json:"fours_hit,omitempty"`
-	IsBatted       int     `json:"is_batted,omitempty"`
-	OutBowler      string  `json:"out_bowler,omitempty"`
-	OutFielder     string  `json:"out_fielder,omitempty"`
-	OutType        string  `json:"out_type,omitempty"`
-	RunsScored     int     `json:"runs_scored,omitempty"`
-	Singles        int     `json:"singles,omitempty"`
-	SixesHit       int     `json:"sixes_hit,omitempty"`
-	Triples        int     `json:"triples,omitempty"`
-	Fifties        int     `json:"fifties,omitempty"`
-	Hundreds       int     `json:"hundreds,omitempty"`
-	Average        float64 `json:"average,omitempty"`
-	HighestScore   int     `json:"highest_score,omitempty"`
-	StrikeRate     float64 `json:"strike_rate,omitempty"`
-	NotOuts        int     `json:"not_outs,omitempty"`
-	Ducks          int     `json:"ducks,omitempty"`
+	BallsFaced     int     `json:"balls_faced"`
+	BattingOrder   int     `json:"batting_order"`
+	DotBallsPlayed int     `json:"dot_balls_played"`
+	Doubles        int     `json:"doubles"`
+	FoursHit       int     `json:"fours_hit"`
+	IsBatted       int     `json:"is_batted"`
+	OutBowler      string  `json:"out_bowler"`
+	OutFielder     string  `json:"out_fielder"`
+	OutType        string  `json:"out_type"`
+	RunsScored     int     `json:"runs_scored"`
+	Singles        int     `json:"singles"`
+	SixesHit       int     `json:"sixes_hit"`
+	Triples        int     `json:"triples"`
+	Fifties        int     `json:"fifties"`
+	Hundreds       int     `json:"hundreds"`
+	Average        float64 `json:"average"`
+	HighestScore   int     `json:"highest_score"`
+	StrikeRate     float64 `json:"strike_rate"`
+	NotOuts        int     `json:"not_outs"`
+	Ducks          int     `json:"ducks"`
 }
 
 type PlayerBowlingStats struct {
-	BowlingOrder   int     `json:"bowling_order,omitempty"`
-	BallsBowled    int     `json:"balls_bowled,omitempty"`
-	DotsBowled     int     `json:"dots_bowled,omitempty"`
-	ExtrasConceded int     `json:"extras_conceded,omitempty"`
-	FoursConceded  int     `json:"fours_conceded,omitempty"`
-	MaidenOver     int     `json:"maiden_over,omitempty"`
-	OversBowled    string  `json:"overs_bowled,omitempty"`
-	RunsConceded   int     `json:"runs_conceded,omitempty"`
-	SixesConceded  int     `json:"sixes_conceded,omitempty"`
-	WicketsTaken   int     `json:"wickets_taken,omitempty"`
-	Economy        float64 `json:"economy,omitempty"`
-	Average        float64 `json:"average,omitempty"`
-	Fifers         float64 `json:"fifers,omitempty"`
-	BestBowling    string  `json:"best_bowling,omitempty"`
+	BowlingOrder   int     `json:"bowling_order"`
+	BallsBowled    int     `json:"balls_bowled"`
+	DotsBowled     int     `json:"dots_bowled"`
+	ExtrasConceded int     `json:"extras_conceded"`
+	FoursConceded  int     `json:"fours_conceded"`
+	MaidenOver     int     `json:"maiden_over"`
+	OversBowled    string  `json:"overs_bowled"`
+	RunsConceded   int     `json:"runs_conceded"`
+	SixesConceded  int     `json:"sixes_conceded"`
+	WicketsTaken   int     `json:"wickets_taken"`
+	Economy        float64 `json:"economy"`
+	Average        float64 `json:"average"`
+	Fifers         float64 `json:"fifers"`
+	BestBowling    string  `json:"best_bowling"`
 }
 
 type PlayerFieldingStats struct {
-	RunOut    int `json:"run_out,omitempty"`
-	Stumpings int `json:"stumpings,omitempty"`
-	Catches   int `json:"catches,omitempty"`
+	RunOut    int `json:"run_out"`
+	Stumpings int `json:"stumpings"`
+	Catches   int `json:"catches"`
 }
 
 type DuranzMatchStats struct {
