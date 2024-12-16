@@ -25,8 +25,8 @@ type BattingStats struct {
 	Sixes        int     `json:"sixes"`
 	StrikeRate   float64 `json:"strike_rate"`
 	Out          string  `json:"out"`
-	OutBowler    string  `json:"-"`
-	OutFielder   string  `json:"-"`
+	OutBowler    int     `json:"-"`
+	OutFielder   int     `json:"-"`
 	Singles      int     `json:"-"`
 	Doubles      int     `json:"-"`
 	Triples      int     `json:"-"`
@@ -63,8 +63,8 @@ type PlayerStats struct {
 	SixesHit     int
 	StrikeRate   float64
 	OutType      string
-	OutBowler    string
-	OutFielder   string
+	OutBowler    int
+	OutFielder   int
 	DotsPlayed   int
 	NotOut       bool
 	IsBatted     bool

@@ -47,8 +47,8 @@ func GetPlayerStats(playerName, league, season string, vsTeam int) map[string][]
 	return objAllPlayerStats
 }
 
-func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []models.DuranzMatchStats {
-	var objAllTeamStats []models.DuranzMatchStats
+func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []CricketMatch {
+	var objAllTeamStats []CricketMatch
 
 	queryString := "(home_team_id = ? OR away_team_id = ?) AND gender = ?"
 	if venue != "" {

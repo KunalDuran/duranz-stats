@@ -227,43 +227,43 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 		for _, pstat := range pstats {
 
 			// bind batting stats
-			playerFinal.Batting.BallsFaced += *pstat.BallsFaced
-			// playerFinal.Batting.BattingOrder += *pstat.BattingOrder
-			playerFinal.Batting.DotBallsPlayed += *pstat.DotBallsPlayed
-			playerFinal.Batting.Doubles += *pstat.Doubles
-			playerFinal.Batting.FoursHit += *pstat.FoursHit
-			playerFinal.Batting.RunsScored += *pstat.RunsScored
-			playerFinal.Batting.Singles += *pstat.Singles
-			playerFinal.Batting.SixesHit += *pstat.SixesHit
-			playerFinal.Batting.Triples += *pstat.Triples
-			// playerFinal.Batting.IsBatted += *pstat.IsBatted
-			if *pstat.RunsScored >= 100 {
+			playerFinal.Batting.BallsFaced += pstat.BallsFaced
+			// playerFinal.Batting.BattingOrder += pstat.BattingOrder
+			playerFinal.Batting.DotBallsPlayed += pstat.DotBallsPlayed
+			playerFinal.Batting.Doubles += pstat.Doubles
+			playerFinal.Batting.FoursHit += pstat.FoursHit
+			playerFinal.Batting.RunsScored += pstat.RunsScored
+			playerFinal.Batting.Singles += pstat.Singles
+			playerFinal.Batting.SixesHit += pstat.SixesHit
+			playerFinal.Batting.Triples += pstat.Triples
+			// playerFinal.Batting.IsBatted += pstat.IsBatted
+			if pstat.RunsScored >= 100 {
 				playerFinal.Batting.Hundreds++
-			} else if *pstat.RunsScored >= 50 {
+			} else if pstat.RunsScored >= 50 {
 				playerFinal.Batting.Fifties++
 			}
 			if pstat.OutType == "not out" {
 				playerFinal.Batting.NotOuts++
 			}
-			if *pstat.RunsScored == 0 && pstat.OutType != "not out" && pstat.OutType != "" {
+			if pstat.RunsScored == 0 && pstat.OutType != "not out" && pstat.OutType != "" {
 				playerFinal.Batting.Ducks++
 			}
 
-			if *pstat.RunsScored > playerFinal.Batting.HighestScore {
-				playerFinal.Batting.HighestScore = *pstat.RunsScored
+			if pstat.RunsScored > playerFinal.Batting.HighestScore {
+				playerFinal.Batting.HighestScore = pstat.RunsScored
 			}
 
 			// bind bowling stats
 			// playerFinal.Bowling.BowlingOrder += pstat.BowlingOrder
-			playerFinal.Bowling.DotsBowled += *pstat.DotsBowled
-			playerFinal.Bowling.MaidenOver += *pstat.MaidenOver
-			playerFinal.Bowling.BallsBowled += *pstat.BallsBowled
-			playerFinal.Bowling.ExtrasConceded += *pstat.ExtrasConceded
-			playerFinal.Bowling.FoursConceded += *pstat.FoursConceded
-			playerFinal.Bowling.RunsConceded += *pstat.RunsConceded
-			playerFinal.Bowling.SixesConceded += *pstat.SixesConceded
-			playerFinal.Bowling.WicketsTaken += *pstat.WicketsTaken
-			if *pstat.WicketsTaken >= 5 {
+			playerFinal.Bowling.DotsBowled += pstat.DotsBowled
+			playerFinal.Bowling.MaidenOver += pstat.MaidenOver
+			playerFinal.Bowling.BallsBowled += pstat.BallsBowled
+			playerFinal.Bowling.ExtrasConceded += pstat.ExtrasConceded
+			playerFinal.Bowling.FoursConceded += pstat.FoursConceded
+			playerFinal.Bowling.RunsConceded += pstat.RunsConceded
+			playerFinal.Bowling.SixesConceded += pstat.SixesConceded
+			playerFinal.Bowling.WicketsTaken += pstat.WicketsTaken
+			if pstat.WicketsTaken >= 5 {
 				playerFinal.Bowling.Fifers++
 			}
 			if playerFinal.Bowling.BestBowling != "" {
@@ -271,19 +271,19 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 				wickets, runs := bowlingFigures[0], bowlingFigures[1]
 				wicketsInt, _ := strconv.ParseInt(wickets, 10, 64)
 				runsInt, _ := strconv.ParseInt(runs, 10, 64)
-				if wicketsInt < int64(*pstat.WicketsTaken) {
-					playerFinal.Bowling.BestBowling = fmt.Sprint(*pstat.WicketsTaken) + "/" + fmt.Sprint(*pstat.RunsConceded)
-				} else if wicketsInt == int64(*pstat.WicketsTaken) && runsInt > int64(*pstat.RunsConceded) {
-					playerFinal.Bowling.BestBowling = fmt.Sprint(*pstat.WicketsTaken) + "/" + fmt.Sprint(*pstat.RunsConceded)
+				if wicketsInt < int64(pstat.WicketsTaken) {
+					playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
+				} else if wicketsInt == int64(pstat.WicketsTaken) && runsInt > int64(pstat.RunsConceded) {
+					playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
 				}
 			} else {
-				playerFinal.Bowling.BestBowling = fmt.Sprint(*pstat.WicketsTaken) + "/" + fmt.Sprint(*pstat.RunsConceded)
+				playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
 			}
 
 			// bind fieling stats
-			playerFinal.Fielding.Catches += *pstat.Catches
-			playerFinal.Fielding.Stumpings += *pstat.Stumpings
-			playerFinal.Fielding.RunOut += *pstat.RunOut
+			playerFinal.Fielding.Catches += pstat.Catches
+			playerFinal.Fielding.Stumpings += pstat.Stumpings
+			playerFinal.Fielding.RunOut += pstat.RunOut
 		}
 		if playerFinal.Bowling.BallsBowled > 0 {
 			playerFinal.Bowling.OversBowled = fmt.Sprint(playerFinal.Bowling.BallsBowled/6) + "." + fmt.Sprint(playerFinal.Bowling.BallsBowled%6)
@@ -328,31 +328,25 @@ func TeamStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	for _, objTeam := range objAllTeamStats {
 
-		if objTeam.TossWinner.Valid {
-			if objTeam.TossWinner.Int64 == int64(teamID) {
-				teamStatistics.TossWin++
-			}
+		if objTeam.TossWinner == teamID {
+			teamStatistics.TossWin++
 		}
 
-		if objTeam.WinningTeam.Valid {
-			if objTeam.WinningTeam.Int64 == int64(teamID) {
-				teamStatistics.MatchWin++
+		if objTeam.WinningTeam == teamID {
+			teamStatistics.MatchWin++
 
-				// count if team won while batting first or chasing first
-				if objTeam.TossWinner.Valid {
-					if objTeam.TossWinner.Int64 == int64(teamID) { // team won the toss
-						if objTeam.TossDecision.String == "bat" {
-							teamStatistics.BatFirstWin++
-						} else {
-							teamStatistics.ChasingWin++
-						}
-					} else {
-						if objTeam.TossDecision.String == "bat" { // other team won the toss
-							teamStatistics.ChasingWin++
-						} else {
-							teamStatistics.BatFirstWin++
-						}
-					}
+			// count if team won while batting first or chasing first
+			if objTeam.TossWinner == teamID { // team won the toss
+				if objTeam.TossDecision == "bat" {
+					teamStatistics.BatFirstWin++
+				} else {
+					teamStatistics.ChasingWin++
+				}
+			} else {
+				if objTeam.TossDecision == "bat" { // other team won the toss
+					teamStatistics.ChasingWin++
+				} else {
+					teamStatistics.BatFirstWin++
 				}
 			}
 		}

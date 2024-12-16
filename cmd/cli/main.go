@@ -71,7 +71,7 @@ func process(cmd string, args []string) {
 		fmt.Println("Processing file:", fileName)
 	}
 
-	DATASET_BASE = DATASET_BASE + data.GamePath[leagueFormat]
+	DATASET_BASE = DATASET_BASE + data.GamePath[leagueFormat] + "/"
 
 	RunAllProcess(cmd, fileName)
 

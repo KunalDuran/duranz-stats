@@ -384,15 +384,15 @@ func ProcessPlayerStats(match models.Match, fileName string) {
 						if wicket.Kind != "run out" {
 							bowler.Wickets++
 							batsman.Out = wicket.Kind
-							batsman.OutBowler = bowler.Name
-							batsman.OutFielder = fielderName
+							batsman.OutBowler = allPlayerID[bowler.Name]
+							batsman.OutFielder = allPlayerID[fielderName]
 						} else if wicket.Kind == "run out" {
 							if batsman.Name == wicket.PlayerOut {
 								batsman.Out = wicket.Kind
-								batsman.OutFielder = fielderName
+								batsman.OutFielder = allPlayerID[fielderName]
 							} else if nonBatsman.Name == wicket.PlayerOut {
 								nonBatsman.Out = wicket.Kind
-								nonBatsman.OutFielder = fielderName
+								nonBatsman.OutFielder = allPlayerID[fielderName]
 							}
 						}
 					}
@@ -790,20 +790,20 @@ func MatchMapper(match models.Match, fileName string) {
 	umpires := strings.Join(match.Info.Umpires, ";")
 
 	cricketMatch := data.CricketMatch{
-		LeagueID:          &leagueID,
-		SeasonID:          &seasonID,
-		HomeTeamID:        &homeTeamID,
-		AwayTeamID:        &awayTeamID,
+		LeagueID:          leagueID,
+		SeasonID:          seasonID,
+		HomeTeamID:        homeTeamID,
+		AwayTeamID:        awayTeamID,
 		HomeTeamName:      home,
 		AwayTeamName:      away,
-		VenueID:           &venueID,
-		MatchDate:         &matchDate,
+		VenueID:           venueID,
+		MatchDate:         matchDate,
 		MatchDateMulti:    strings.Join(match.Info.Dates, ";"),
 		CricsheetFileName: fileName,
 		Result:            resultStr,
-		TossWinner:        &tossWinner,
+		TossWinner:        tossWinner,
 		TossDecision:      tossDecision,
-		WinningTeam:       &winningTeam,
+		WinningTeam:       winningTeam,
 		Gender:            match.Info.Gender,
 		MatchRefrees:      matchReferees,
 		ReserveUmpires:    reserveUmpires,

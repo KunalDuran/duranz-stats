@@ -1,7 +1,5 @@
 package models
 
-import "database/sql"
-
 var AllDuranzLeagues = map[string]int{
 	"odi":                   1,
 	"test":                  2,
@@ -75,38 +73,6 @@ type PlayerFieldingStats struct {
 	RunOut    int `json:"run_out"`
 	Stumpings int `json:"stumpings"`
 	Catches   int `json:"catches"`
-}
-
-type DuranzMatchStats struct {
-	MatchID           sql.NullString `json:"match_id"`
-	LeagueID          sql.NullString `json:"league_id"`
-	Gender            sql.NullString `json:"gender"`
-	SeasonID          sql.NullString `json:"season_id"`
-	HomeTeamID        sql.NullString `json:"home_team_id"`
-	AwayTeamID        sql.NullString `json:"away_team_id"`
-	HomeTeamName      sql.NullString `json:"home_team_name"`
-	AwayTeamName      sql.NullString `json:"away_team_name"`
-	VenueID           sql.NullString `json:"venue_id"`
-	Result            sql.NullString `json:"result"`
-	ManOfTheMatch     sql.NullString `json:"man_of_the_match"`
-	TossWinner        sql.NullInt64  `json:"toss_winner"`
-	TossDecision      sql.NullString `json:"toss_decision"`
-	WinningTeam       sql.NullInt64  `json:"winning_team"`
-	CricsheetFileName sql.NullString `json:"cricsheet_file_name"`
-	MatchDate         sql.NullString `json:"match_date"`
-	MatchDateMulti    sql.NullString `json:"match_date_multi"`
-	MatchTime         sql.NullString `json:"match_time"`
-	IsReschedule      sql.NullString `json:"is_reschedule"`
-	IsAbandoned       sql.NullString `json:"is_abandoned"`
-	IsNeutral         sql.NullString `json:"is_neutral"`
-	MatchRefrees      sql.NullString `json:"match_refrees"`
-	ReserveUmpires    sql.NullString `json:"reserve_umpires"`
-	TvUmpires         sql.NullString `json:"tv_umpires"`
-	Umpires           sql.NullString `json:"umpires"`
-	DateAdded         sql.NullString `json:"date_added"`
-	LastUpdate        sql.NullString `json:"last_update"`
-	MatchEndTime      sql.NullString `json:"match_end_time"`
-	Status            sql.NullString `json:"status"`
 }
 
 type DuranzTeamStats struct {
