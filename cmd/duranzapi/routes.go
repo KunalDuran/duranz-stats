@@ -14,7 +14,7 @@ func addRouteHandlers(router *httprouter.Router) {
 
 	router.GET("/player-stats/:player", PlayerStatsAPI)
 	router.GET("/team-stats/:team", TeamStatsAPI)
-	router.GET("/player-vs-team/:player", PlayerStatsAPI)
+	router.GET("/player-vs-player/:player", PlayerVSPlayer)
 	router.GET("/batsman-vs-bowler/", BatsmanVSBowlerAPI)
 
 	router.GET("/player-list/", PlayerList)

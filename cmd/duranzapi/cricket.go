@@ -390,3 +390,8 @@ func TeamList(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	final := utils.JSONMessageWrappedObj(http.StatusOK, teamList)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
+
+func PlayerVSPlayer(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	// playerName := p.ByName("player")
+
+}
