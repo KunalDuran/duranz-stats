@@ -223,7 +223,7 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 		// playerFinal.OutType += pstat.OutType
 		playerFinal.SeasonID = season
 		// playerFinal.SeasonType += pstat.SeasonType
-
+		outTypeCounter := make(map[string]int)
 		for _, pstat := range pstats {
 
 			// bind batting stats
@@ -244,6 +244,10 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 			}
 			if pstat.OutType == "not out" {
 				playerFinal.Batting.NotOuts++
+			}
+
+			if pstat.OutType != "" && pstat.OutType != "not out" {
+				outTypeCounter[pstat.OutType]++
 			}
 			if pstat.RunsScored == 0 && pstat.OutType != "not out" && pstat.OutType != "" {
 				playerFinal.Batting.Ducks++
@@ -285,6 +289,7 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 			playerFinal.Fielding.Stumpings += pstat.Stumpings
 			playerFinal.Fielding.RunOut += pstat.RunOut
 		}
+		playerFinal.Batting.OutType = outTypeCounter
 		if playerFinal.Bowling.BallsBowled > 0 {
 			playerFinal.Bowling.OversBowled = fmt.Sprint(playerFinal.Bowling.BallsBowled/6) + "." + fmt.Sprint(playerFinal.Bowling.BallsBowled%6)
 		}

@@ -30,26 +30,25 @@ type PlayerStatsExt struct {
 }
 
 type PlayerBattingStats struct {
-	BallsFaced     int     `json:"balls_faced"`
-	BattingOrder   int     `json:"batting_order"`
-	DotBallsPlayed int     `json:"dot_balls_played"`
-	Doubles        int     `json:"doubles"`
-	FoursHit       int     `json:"fours_hit"`
-	IsBatted       int     `json:"is_batted"`
-	OutBowler      string  `json:"out_bowler"`
-	OutFielder     string  `json:"out_fielder"`
-	OutType        string  `json:"out_type"`
-	RunsScored     int     `json:"runs_scored"`
-	Singles        int     `json:"singles"`
-	SixesHit       int     `json:"sixes_hit"`
-	Triples        int     `json:"triples"`
-	Fifties        int     `json:"fifties"`
-	Hundreds       int     `json:"hundreds"`
-	Average        float64 `json:"average"`
-	HighestScore   int     `json:"highest_score"`
-	StrikeRate     float64 `json:"strike_rate"`
-	NotOuts        int     `json:"not_outs"`
-	Ducks          int     `json:"ducks"`
+	BallsFaced     int            `json:"balls_faced"`
+	DotBallsPlayed int            `json:"dot_balls_played"`
+	Singles        int            `json:"singles"`
+	Doubles        int            `json:"doubles"`
+	Triples        int            `json:"triples"`
+	FoursHit       int            `json:"fours_hit"`
+	SixesHit       int            `json:"sixes_hit"`
+	IsBatted       int            `json:"is_batted,omitempty"`
+	OutBowler      string         `json:"out_bowler"`
+	OutFielder     string         `json:"out_fielder"`
+	OutType        map[string]int `json:"out_type"`
+	RunsScored     int            `json:"runs_scored"`
+	Fifties        int            `json:"fifties"`
+	Hundreds       int            `json:"hundreds"`
+	Average        float64        `json:"average"`
+	HighestScore   int            `json:"highest_score"`
+	StrikeRate     float64        `json:"strike_rate"`
+	NotOuts        int            `json:"not_outs"`
+	Ducks          int            `json:"ducks"`
 }
 
 type PlayerBowlingStats struct {
