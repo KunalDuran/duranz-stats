@@ -194,6 +194,11 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	season := utils.CleanText(r.URL.Query().Get("season"), true)
 	vsteam := utils.CleanText(r.URL.Query().Get("vsteam"), true)
 
+	if format == "" {
+		utils.WebResponseJSONObject(w, r, http.StatusOK, []byte(`{"message":"missing required query param format"}`))
+		return
+	}
+
 	if playerName == "all" {
 		// do something
 	}

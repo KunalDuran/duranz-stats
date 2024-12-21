@@ -1,56 +1,57 @@
-"# duranz-stats-cli" 
+"# duranz-stats" 
  
- Package written in GO programming Language for storing/extracting stats to perform analysis from the ball by ball data available on cricsheet.
+ Application written in Go programming Language for storing/extracting stats to perform analysis from the ball by ball data available on cricsheet.
  
   - Dataset: Cricsheet [https://cricsheet.org/]
 > Currently works with odi, t20, test, ipl data
 
 
-Apply your cricketing brain and run queries on the extracted stats to find amazing insights. 
+Stats Provided:
 
-Common Stats Examples.
-
+1. Player Stats
     - Batting Stats
         Runs Scored
         Balls Played
         Average
         Strike Rate
+        Dot balls
         Number of 6s, 4s, 3s, 2s, 1
-        Out Types
+        No. of times dismissal (by type, e.g, bowled 10 times)
+        Not out
+        Ducks
+        Highest Score
     - Bowling Stats
         Runs Conceded
         Balls Bowled
+        Dots
         Average
         Economy
         6s, 4s, 3s, 2s, 1 Conceded
+        Extras conceded
+        Wickets taken 
+        Best bowling figure
         Maiden
     - Fielding Stats
         Catches
         Run Outs
         Stumpings
-    - Player Vs Player Stats
-    - Batsman X vs Bowler Y
-    - No. of times dismissal (by type, e.g, bowled 10 times)
-    
 
-> Check this out also : duranzapi (web application). 
-> To be published soon and will be available on https://www.kunalduran.com
+    Filters: year, format, vsteam
 
-# process to run the application
 
-##### # pre-requisites
-- Go 
-- mysql
+2. Team Stats
+    - Total Matches
+    - Win
+    - Bat first win
+    - Chase win
+    - Average score
+    - Highest score
+    - Lowest score
+    - Toss win
 
-> step1 : clone repository 
-> step2 : download cricsheet data anywhere
-> step3 : provide path to data in the module/process/cricket.go line:15
-> step4 : run go build or go run main.go with appropriate arguments
+    Filters: year, format, vsteam, venue
 
-### Available commands example:
-
-- To create all the tables run *go run main.go initial*
-- To empty the complete database *go run main.go delete*
-- Run format wise commands *go run main.go all odi* 
-- *go run main.go all ipl*
-- Run process for a particular matchfile *go run main.go all test 42242.json*
+3. Match Stats (TBD)
+    - Scoresheet
+    - run rate graph
+    - over by over analysis
