@@ -52,6 +52,7 @@ Stats Provided:
     Filters: year, format, vsteam, venue
 
 3. Match Stats (TBD)
-    - Scoresheet
+    - Scoresheet, Fall of Wickets, Partnerships
+    - Batsman vs Bowler
     - run rate graph
     - over by over analysis
