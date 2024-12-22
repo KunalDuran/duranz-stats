@@ -64,12 +64,20 @@ type Registry struct {
 }
 
 type Innings struct {
-	InningID      int            `json:"innings_id"`
-	InningDetail  string         `json:"innings_detail"`
-	Bowling       []BowlingStats `json:"bowling"`
-	Batting       []BattingStats `json:"batting"`
+	InningID      int                 `json:"innings_id"`
+	InningDetail  string              `json:"innings_detail"`
+	Bowling       []BowlingStats      `json:"bowling"`
+	Batting       []BattingStats      `json:"batting"`
+	OverByOver    map[int]int         `json:"over_by_over"`
+	Partnerships  map[int]Partnership `json:"partnerships"`
 	Extras        `json:"extras"`
 	FallOfWickets string `json:"fall_of_wickets"`
+}
+
+type Partnership struct {
+	Batsman1 string
+	Batsman2 string
+	Runs     int
 }
 
 type Extras struct {

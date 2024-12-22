@@ -48,6 +48,8 @@ func GetScoreCard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		var objInning models.Innings
 		objInning.InningDetail = inning.Team
 
+		partnerships := make(map[int]models.Partnership)
+
 		var objExtra models.Extras
 		var objBatsman = map[string]models.BattingStats{}
 		var objBowler = map[string]models.BowlingStats{}
@@ -69,10 +71,22 @@ func GetScoreCard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 					tempBat.BattingOrder = batsmanCount
 					tempBat.Name = delivery.Batter
 					objBatsman[delivery.Batter] = tempBat
+
 				}
 				batsman := objBatsman[delivery.Batter]
 				batsman.Runs += delivery.Runs.Batter
 				batsman.Balls += 1
+
+				//partnership
+				if _, ok := partnerships[wicketCnt]; !ok {
+					fmt.Println("init partnership")
+					partnerships[wicketCnt] = models.Partnership{
+						Batsman1: delivery.Batter,
+						Batsman2: delivery.NonStriker,
+					}
+				}
+				partner := partnerships[wicketCnt]
+				partner.Runs += delivery.Total
 
 				// Bowler Init
 				if _, exist := objBowler[delivery.Bowler]; !exist {
@@ -131,6 +145,7 @@ func GetScoreCard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				}
 
 				// bind all info and calculations
+				partnerships[wicketCnt] = partner
 				objBatsman[delivery.Batter] = batsman
 				objBowler[delivery.Bowler] = bowler
 			}
@@ -171,6 +186,8 @@ func GetScoreCard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		objInning.FallOfWickets = strings.Join(fowArr, " , ")
 		objInning.Bowling = allBowler
 
+		objInning.Partnerships = partnerships
+		objInning.OverByOver = overRuns
 		AllInnings = append(AllInnings, objInning)
 	}
 
