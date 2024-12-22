@@ -79,14 +79,14 @@ func GetScoreCard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 				//partnership
 				if _, ok := partnerships[wicketCnt]; !ok {
-					fmt.Println("init partnership")
 					partnerships[wicketCnt] = models.Partnership{
 						Batsman1: delivery.Batter,
 						Batsman2: delivery.NonStriker,
 					}
 				}
 				partner := partnerships[wicketCnt]
-				partner.Runs += delivery.Total
+				partner.Runs += delivery.Runs.Total
+				partnerships[wicketCnt] = partner
 
 				// Bowler Init
 				if _, exist := objBowler[delivery.Bowler]; !exist {
@@ -145,7 +145,6 @@ func GetScoreCard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 				}
 
 				// bind all info and calculations
-				partnerships[wicketCnt] = partner
 				objBatsman[delivery.Batter] = batsman
 				objBowler[delivery.Bowler] = bowler
 			}
@@ -187,6 +186,7 @@ func GetScoreCard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		objInning.Bowling = allBowler
 
 		objInning.Partnerships = partnerships
+		fmt.Printf("%v+", partnerships)
 		objInning.OverByOver = overRuns
 		AllInnings = append(AllInnings, objInning)
 	}
