@@ -35,8 +35,8 @@ type PlayerBattingStats struct {
 	Singles        int            `json:"singles"`
 	Doubles        int            `json:"doubles"`
 	Triples        int            `json:"triples"`
-	FoursHit       int            `json:"fours_hit"`
-	SixesHit       int            `json:"sixes_hit"`
+	FoursHit       int            `json:"fours"`
+	SixesHit       int            `json:"sixes"`
 	IsBatted       int            `json:"is_batted,omitempty"`
 	OutBowler      string         `json:"out_bowler"`
 	OutFielder     string         `json:"out_fielder"`
@@ -54,14 +54,14 @@ type PlayerBattingStats struct {
 type PlayerBowlingStats struct {
 	BowlingOrder   int     `json:"bowling_order"`
 	BallsBowled    int     `json:"balls_bowled"`
-	DotsBowled     int     `json:"dots_bowled"`
-	ExtrasConceded int     `json:"extras_conceded"`
-	FoursConceded  int     `json:"fours_conceded"`
-	MaidenOver     int     `json:"maiden_over"`
+	DotsBowled     int     `json:"dots"`
+	ExtrasConceded int     `json:"extras"`
+	FoursConceded  int     `json:"fours"`
+	MaidenOver     int     `json:"maiden"`
 	OversBowled    string  `json:"overs_bowled"`
 	RunsConceded   int     `json:"runs_conceded"`
-	SixesConceded  int     `json:"sixes_conceded"`
-	WicketsTaken   int     `json:"wickets_taken"`
+	SixesConceded  int     `json:"sixes"`
+	WicketsTaken   int     `json:"wickets"`
 	Economy        float64 `json:"economy"`
 	Average        float64 `json:"average"`
 	Fifers         float64 `json:"fifers"`

@@ -8,14 +8,13 @@ import (
 	_ "github.com/go-sql-driver/mysql" // MySQL driver
 )
 
-func GetPlayerStats(playerName, league, season string, vsTeam int) map[string][]PlayerMatchStats {
-	objAllPlayerStats := map[string][]PlayerMatchStats{}
+func GetPlayerStats(playerName, league, season string, vsTeam int) []PlayerMatchStats {
 
 	query := DB.Table("cricket_players as player").
 		Select("player.player_name, pms.*").
 		Joins("LEFT JOIN player_match_stats AS pms ON pms.player_id = player.player_id").
 		Joins("LEFT JOIN cricket_matches matches ON matches.match_id = pms.match_id").
-		Where("player_name = ? AND league_id = ?", playerName, models.AllDuranzLeagues[league])
+		Where("(player_name = ? OR display_name = ?) AND league_id = ?", playerName, playerName, models.AllDuranzLeagues[league])
 
 	if season != "" {
 		if seasonID, err := strconv.ParseInt(season, 10, 64); err == nil && seasonID > 1950 {
@@ -28,23 +27,12 @@ func GetPlayerStats(playerName, league, season string, vsTeam int) map[string][]
 			vsTeam, vsTeam, vsTeam)
 	}
 
-	var results []struct {
-		PlayerName string
-		PlayerMatchStats
-	}
-
+	var results []PlayerMatchStats
 	if err := query.Find(&results).Error; err != nil {
 		panic(err)
 	}
 
-	for _, result := range results {
-		objAllPlayerStats[result.PlayerName] = append(
-			objAllPlayerStats[result.PlayerName],
-			result.PlayerMatchStats,
-		)
-	}
-
-	return objAllPlayerStats
+	return results
 }
 
 func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []CricketMatch {

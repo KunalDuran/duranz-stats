@@ -3,9 +3,10 @@ module github.com/KunalDuran/duranz-stats
 go 1.22.1
 
 require (
+	github.com/go-chi/chi/v5 v5.2.0
+	github.com/go-chi/cors v1.2.1
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/gomodule/redigo v1.9.2
-	github.com/julienschmidt/httprouter v1.3.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
 )

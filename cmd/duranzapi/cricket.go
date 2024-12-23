@@ -12,8 +12,7 @@ import (
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	"github.com/KunalDuran/duranz-stats/internal/models"
 	"github.com/KunalDuran/duranz-stats/internal/utils"
-
-	"github.com/julienschmidt/httprouter"
+	"github.com/go-chi/chi/v5"
 )
 
 // GetCricsheetData : Reads the match json file
@@ -31,8 +30,8 @@ func GetCricsheetData(f_path string) (models.Match, error) {
 	return matchData, nil
 }
 
-func GetScoreCard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	jsonID := p.ByName("file")
+func GetScoreCard(w http.ResponseWriter, r *http.Request) {
+	jsonID := chi.URLParam(r, "file")
 	match, err := GetCricsheetData(DATASET_BASE + jsonID + `.json`)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -204,11 +203,11 @@ func GetScoreCard(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 
-func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	playerName := p.ByName("player")
+func PlayerStatsAPI(w http.ResponseWriter, r *http.Request) {
+	playerName := chi.URLParam(r, "player")
 	bio := r.URL.Query().Get("bio")
 	format := utils.CleanText(r.URL.Query().Get("format"), true)
-	season := utils.CleanText(r.URL.Query().Get("season"), true)
+	year := utils.CleanText(r.URL.Query().Get("year"), true)
 	vsteam := utils.CleanText(r.URL.Query().Get("vsteam"), true)
 
 	if format == "" {
@@ -228,119 +227,119 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	if vsteam != "" {
 		vsTeamID = data.GetTeamIDByTeamName(vsteam)
 	}
-	var playerFinalAll []models.PlayerStatsExt
-	objAllPlayerStats := data.GetPlayerStats(playerName, format, season, vsTeamID)
+	objAllPlayerStats := data.GetPlayerStats(playerName, format, year, vsTeamID)
 
-	for pname, pstats := range objAllPlayerStats {
-		var playerFinal models.PlayerStatsExt
-
-		// General Stats
-		playerFinal.TeamID = int64(pstats[0].TeamID)
-		playerFinal.PlayerID = int64(pstats[0].PlayerID)
-		playerFinal.PlayerName = pname
-
-		// playerFinal.InningsID += pstat.InningsID
-		// playerFinal.OutBowler += pstat.OutBowler
-		// playerFinal.OutFielder += pstat.OutFielder
-		// playerFinal.OutType += pstat.OutType
-		playerFinal.SeasonID = season
-		// playerFinal.SeasonType += pstat.SeasonType
-		outTypeCounter := make(map[string]int)
-		for _, pstat := range pstats {
-
-			// bind batting stats
-			playerFinal.Batting.BallsFaced += pstat.BallsFaced
-			// playerFinal.Batting.BattingOrder += pstat.BattingOrder
-			playerFinal.Batting.DotBallsPlayed += pstat.DotBallsPlayed
-			playerFinal.Batting.Doubles += pstat.Doubles
-			playerFinal.Batting.FoursHit += pstat.FoursHit
-			playerFinal.Batting.RunsScored += pstat.RunsScored
-			playerFinal.Batting.Singles += pstat.Singles
-			playerFinal.Batting.SixesHit += pstat.SixesHit
-			playerFinal.Batting.Triples += pstat.Triples
-			// playerFinal.Batting.IsBatted += pstat.IsBatted
-			if pstat.RunsScored >= 100 {
-				playerFinal.Batting.Hundreds++
-			} else if pstat.RunsScored >= 50 {
-				playerFinal.Batting.Fifties++
-			}
-			if pstat.OutType == "not out" {
-				playerFinal.Batting.NotOuts++
-			}
-
-			if pstat.OutType != "" && pstat.OutType != "not out" {
-				outTypeCounter[pstat.OutType]++
-			}
-			if pstat.RunsScored == 0 && pstat.OutType != "not out" && pstat.OutType != "" {
-				playerFinal.Batting.Ducks++
-			}
-
-			if pstat.RunsScored > playerFinal.Batting.HighestScore {
-				playerFinal.Batting.HighestScore = pstat.RunsScored
-			}
-
-			// bind bowling stats
-			// playerFinal.Bowling.BowlingOrder += pstat.BowlingOrder
-			playerFinal.Bowling.DotsBowled += pstat.DotsBowled
-			playerFinal.Bowling.MaidenOver += pstat.MaidenOver
-			playerFinal.Bowling.BallsBowled += pstat.BallsBowled
-			playerFinal.Bowling.ExtrasConceded += pstat.ExtrasConceded
-			playerFinal.Bowling.FoursConceded += pstat.FoursConceded
-			playerFinal.Bowling.RunsConceded += pstat.RunsConceded
-			playerFinal.Bowling.SixesConceded += pstat.SixesConceded
-			playerFinal.Bowling.WicketsTaken += pstat.WicketsTaken
-			if pstat.WicketsTaken >= 5 {
-				playerFinal.Bowling.Fifers++
-			}
-			if playerFinal.Bowling.BestBowling != "" {
-				bowlingFigures := strings.Split(playerFinal.Bowling.BestBowling, "/")
-				wickets, runs := bowlingFigures[0], bowlingFigures[1]
-				wicketsInt, _ := strconv.ParseInt(wickets, 10, 64)
-				runsInt, _ := strconv.ParseInt(runs, 10, 64)
-				if wicketsInt < int64(pstat.WicketsTaken) {
-					playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
-				} else if wicketsInt == int64(pstat.WicketsTaken) && runsInt > int64(pstat.RunsConceded) {
-					playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
-				}
-			} else {
-				playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
-			}
-
-			// bind fieling stats
-			playerFinal.Fielding.Catches += pstat.Catches
-			playerFinal.Fielding.Stumpings += pstat.Stumpings
-			playerFinal.Fielding.RunOut += pstat.RunOut
-		}
-		playerFinal.Batting.OutType = outTypeCounter
-		if playerFinal.Bowling.BallsBowled > 0 {
-			playerFinal.Bowling.OversBowled = fmt.Sprint(playerFinal.Bowling.BallsBowled/6) + "." + fmt.Sprint(playerFinal.Bowling.BallsBowled%6)
-		}
-
-		if playerFinal.Batting.IsBatted-playerFinal.Batting.NotOuts > 0 {
-			playerFinal.Batting.Average = utils.Round((float64(playerFinal.Batting.RunsScored))/float64(playerFinal.Batting.IsBatted-playerFinal.Batting.NotOuts), 0.01, 2)
-		}
-
-		if playerFinal.Batting.BallsFaced > 0 {
-			playerFinal.Batting.StrikeRate = utils.Round((float64(playerFinal.Batting.RunsScored)*100)/float64(playerFinal.Batting.BallsFaced), 0.01, 2)
-		}
-
-		if playerFinal.Bowling.WicketsTaken > 0 {
-			playerFinal.Bowling.Average = utils.Round((float64(playerFinal.Bowling.RunsConceded))/float64(playerFinal.Bowling.WicketsTaken), 0.01, 2)
-		}
-
-		if playerFinal.Bowling.BallsBowled > 0 {
-			playerFinal.Bowling.Economy = utils.Round((float64(playerFinal.Bowling.RunsConceded))/(float64(playerFinal.Bowling.BallsBowled)/6), 0.01, 2)
-		}
-
-		playerFinalAll = append(playerFinalAll, playerFinal)
+	var playerFinal models.PlayerStatsExt
+	if len(objAllPlayerStats) == 0 {
+		final := utils.JSONMessageWrappedObj(http.StatusOK, playerFinal)
+		utils.WebResponseJSONObject(w, r, http.StatusOK, final)
+		return
 	}
 
-	final := utils.JSONMessageWrappedObj(http.StatusOK, playerFinalAll)
+	// General Stats
+	playerFinal.TeamID = int64(objAllPlayerStats[0].TeamID)
+	playerFinal.PlayerID = int64(objAllPlayerStats[0].PlayerID)
+	playerFinal.PlayerName = playerName
+
+	// playerFinal.InningsID += pstat.InningsID
+	// playerFinal.OutBowler += pstat.OutBowler
+	// playerFinal.OutFielder += pstat.OutFielder
+	// playerFinal.OutType += pstat.OutType
+	playerFinal.SeasonID = year
+	// playerFinal.SeasonType += pstat.SeasonType
+	outTypeCounter := make(map[string]int)
+	for _, pstat := range objAllPlayerStats {
+
+		// bind batting stats
+		playerFinal.Batting.BallsFaced += pstat.BallsFaced
+		// playerFinal.Batting.BattingOrder += pstat.BattingOrder
+		playerFinal.Batting.DotBallsPlayed += pstat.DotBallsPlayed
+		playerFinal.Batting.Doubles += pstat.Doubles
+		playerFinal.Batting.FoursHit += pstat.FoursHit
+		playerFinal.Batting.RunsScored += pstat.RunsScored
+		playerFinal.Batting.Singles += pstat.Singles
+		playerFinal.Batting.SixesHit += pstat.SixesHit
+		playerFinal.Batting.Triples += pstat.Triples
+		// playerFinal.Batting.IsBatted += pstat.IsBatted
+		if pstat.RunsScored >= 100 {
+			playerFinal.Batting.Hundreds++
+		} else if pstat.RunsScored >= 50 {
+			playerFinal.Batting.Fifties++
+		}
+		if pstat.OutType == "not out" {
+			playerFinal.Batting.NotOuts++
+		}
+
+		if pstat.OutType != "" && pstat.OutType != "not out" {
+			outTypeCounter[pstat.OutType]++
+		}
+		if pstat.RunsScored == 0 && pstat.OutType != "not out" && pstat.OutType != "" {
+			playerFinal.Batting.Ducks++
+		}
+
+		if pstat.RunsScored > playerFinal.Batting.HighestScore {
+			playerFinal.Batting.HighestScore = pstat.RunsScored
+		}
+
+		// bind bowling stats
+		// playerFinal.Bowling.BowlingOrder += pstat.BowlingOrder
+		playerFinal.Bowling.DotsBowled += pstat.DotsBowled
+		playerFinal.Bowling.MaidenOver += pstat.MaidenOver
+		playerFinal.Bowling.BallsBowled += pstat.BallsBowled
+		playerFinal.Bowling.ExtrasConceded += pstat.ExtrasConceded
+		playerFinal.Bowling.FoursConceded += pstat.FoursConceded
+		playerFinal.Bowling.RunsConceded += pstat.RunsConceded
+		playerFinal.Bowling.SixesConceded += pstat.SixesConceded
+		playerFinal.Bowling.WicketsTaken += pstat.WicketsTaken
+		if pstat.WicketsTaken >= 5 {
+			playerFinal.Bowling.Fifers++
+		}
+		if playerFinal.Bowling.BestBowling != "" {
+			bowlingFigures := strings.Split(playerFinal.Bowling.BestBowling, "/")
+			wickets, runs := bowlingFigures[0], bowlingFigures[1]
+			wicketsInt, _ := strconv.ParseInt(wickets, 10, 64)
+			runsInt, _ := strconv.ParseInt(runs, 10, 64)
+			if wicketsInt < int64(pstat.WicketsTaken) {
+				playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
+			} else if wicketsInt == int64(pstat.WicketsTaken) && runsInt > int64(pstat.RunsConceded) {
+				playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
+			}
+		} else {
+			playerFinal.Bowling.BestBowling = fmt.Sprint(pstat.WicketsTaken) + "/" + fmt.Sprint(pstat.RunsConceded)
+		}
+
+		// bind fieling stats
+		playerFinal.Fielding.Catches += pstat.Catches
+		playerFinal.Fielding.Stumpings += pstat.Stumpings
+		playerFinal.Fielding.RunOut += pstat.RunOut
+	}
+	playerFinal.Batting.OutType = outTypeCounter
+	if playerFinal.Bowling.BallsBowled > 0 {
+		playerFinal.Bowling.OversBowled = fmt.Sprint(playerFinal.Bowling.BallsBowled/6) + "." + fmt.Sprint(playerFinal.Bowling.BallsBowled%6)
+	}
+
+	if playerFinal.Batting.IsBatted-playerFinal.Batting.NotOuts > 0 {
+		playerFinal.Batting.Average = utils.Round((float64(playerFinal.Batting.RunsScored))/float64(playerFinal.Batting.IsBatted-playerFinal.Batting.NotOuts), 0.01, 2)
+	}
+
+	if playerFinal.Batting.BallsFaced > 0 {
+		playerFinal.Batting.StrikeRate = utils.Round((float64(playerFinal.Batting.RunsScored)*100)/float64(playerFinal.Batting.BallsFaced), 0.01, 2)
+	}
+
+	if playerFinal.Bowling.WicketsTaken > 0 {
+		playerFinal.Bowling.Average = utils.Round((float64(playerFinal.Bowling.RunsConceded))/float64(playerFinal.Bowling.WicketsTaken), 0.01, 2)
+	}
+
+	if playerFinal.Bowling.BallsBowled > 0 {
+		playerFinal.Bowling.Economy = utils.Round((float64(playerFinal.Bowling.RunsConceded))/(float64(playerFinal.Bowling.BallsBowled)/6), 0.01, 2)
+	}
+
+	final := utils.JSONMessageWrappedObj(http.StatusOK, playerFinal)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 
-func TeamStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	teamName := p.ByName("team")
+func TeamStatsAPI(w http.ResponseWriter, r *http.Request) {
+	teamName := chi.URLParam(r, "team")
 	gender := utils.CleanText(r.URL.Query().Get("gender"), true)
 	if gender == "" {
 		gender = "male"
@@ -397,11 +396,11 @@ func TeamStatsAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 
-func BatsmanVSBowlerAPI(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func BatsmanVSBowlerAPI(w http.ResponseWriter, r *http.Request) {
 	//
 }
 
-func PlayerList(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func PlayerList(w http.ResponseWriter, r *http.Request) {
 	matchCount := utils.CleanText(r.URL.Query().Get("cnt"), true)
 	if matchCount == "" {
 		matchCount = "10"
@@ -412,13 +411,22 @@ func PlayerList(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 
-func TeamList(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func TeamList(w http.ResponseWriter, r *http.Request) {
 	teamList := data.GetTeamList()
 	final := utils.JSONMessageWrappedObj(http.StatusOK, teamList)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 
-func PlayerVSPlayer(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	// playerName := p.ByName("player")
+func MatchList(w http.ResponseWriter, r *http.Request) {
+	// year := utils.CleanText(r.URL.Query().Get("year"), true)
+	// format := utils.CleanText(r.URL.Query().Get("format"), true)
+	// team := utils.CleanText(r.URL.Query().Get("team"), true)
+	// matchList := data.GetMatchList(year, format, team)
+	// final := utils.JSONMessageWrappedObj(http.StatusOK, matchList)
+	// utils.WebResponseJSONObject(w, r, http.StatusOK, final)
+}
+
+func PlayerVSPlayer(w http.ResponseWriter, r *http.Request) {
+	// playerName := chi.URLParam(r, "player")
 
 }

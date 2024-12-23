@@ -3,25 +3,24 @@ package main
 import (
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/go-chi/chi/v5"
 )
 
 // addRouteHandlers adds routes for various APIs.
-func addRouteHandlers(router *httprouter.Router) {
+func addRouteHandlers(router *chi.Mux) {
+	router.Get("/", index)
+	router.Get("/scorecard/{file}", GetScoreCard)
 
-	router.GET("/", index)
-	router.GET("/scorecard/:file", GetScoreCard)
+	router.Get("/player-stats/{player}", PlayerStatsAPI)
+	router.Get("/team-stats/{team}", TeamStatsAPI)
+	router.Get("/player-vs-player/{player}", PlayerVSPlayer)
+	router.Get("/batsman-vs-bowler/", BatsmanVSBowlerAPI)
 
-	router.GET("/player-stats/:player", PlayerStatsAPI)
-	router.GET("/team-stats/:team", TeamStatsAPI)
-	router.GET("/player-vs-player/:player", PlayerVSPlayer)
-	router.GET("/batsman-vs-bowler/", BatsmanVSBowlerAPI)
-
-	router.GET("/player-list/", PlayerList)
-	router.GET("/team-list/", TeamList)
+	router.Get("/player-list/", PlayerList)
+	router.Get("/team-list/", TeamList)
 
 }
 
-func index(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func index(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Duranz Statistics API"))
 }
