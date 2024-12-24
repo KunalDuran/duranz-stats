@@ -344,12 +344,12 @@ func TeamStatsAPI(w http.ResponseWriter, r *http.Request) {
 	if gender == "" {
 		gender = "male"
 	}
-	season := utils.CleanText(r.URL.Query().Get("season"), true)
+	year := utils.CleanText(r.URL.Query().Get("year"), true)
 	venue := utils.CleanText(r.URL.Query().Get("venue"), true)
 	vsTeam := utils.CleanText(r.URL.Query().Get("vsteam"), true)
 
 	teamID := data.GetTeamIDByTeamName(teamName)
-	objAllTeamStats := data.GetTeamStats(teamID, gender, season, venue, vsTeam)
+	objAllTeamStats := data.GetTeamStats(teamID, gender, year, venue, vsTeam)
 	var teamStatistics models.DuranzTeamStats
 
 	for _, objTeam := range objAllTeamStats {

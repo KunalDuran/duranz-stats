@@ -76,7 +76,7 @@ type PlayerFieldingStats struct {
 
 type DuranzTeamStats struct {
 	TotalMatches    int     `json:"total_matches"`
-	MatchWin        int     `json:"match_win"`
+	MatchWin        int     `json:"win"`
 	MatchWinPercent float64 `json:"win_percent"`
 	BatFirstWin     int     `json:"bat_first_win"`
 	ChasingWin      int     `json:"chasing_win"`
