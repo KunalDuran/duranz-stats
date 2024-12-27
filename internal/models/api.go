@@ -15,6 +15,7 @@ type ScoreCard struct {
 
 type PlayerStatsExt struct {
 	MatchID                int64  `json:"match_id"`
+	MatchesPlayed          int64  `json:"matches_played"`
 	InningsID              string `json:"innings_id"`
 	SeasonID               string `json:"season_id"`
 	SeasonType             string `json:"season_type"`
@@ -83,8 +84,15 @@ type DuranzTeamStats struct {
 	BatFirstWinPer  float64 `json:"bat_first_win_per"`
 	ChasingWinPer   float64 `json:"chasing_win_per"`
 	AvgScoreInn     float64 `json:"avg_score_inn"`
-	HighestScore    int     `json:"highest_score"`
-	LowestScore     int     `json:"lowest_score"`
-	TossWin         float64 `json:"toss_win"`
-	TossWinPercent  float64 `json:"toss_win_percent"`
+	HighestScore    struct {
+		Runs  int `json:"runs"`
+		Match int `json:"match"`
+	} `json:"highest_score"`
+
+	LowestScore struct {
+		Runs  int `json:"runs"`
+		Match int `json:"match"`
+	} `json:"lowest_score"`
+	TossWin        float64 `json:"toss_win"`
+	TossWinPercent float64 `json:"toss_win_percent"`
 }

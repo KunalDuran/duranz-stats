@@ -3,17 +3,18 @@ package data
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/KunalDuran/duranz-stats/internal/models"
 )
 
 func GetPlayerStats(playerName, league, season string, vsTeam int) []PlayerMatchStats {
-
-	query := DB.Table("cricket_players as player").
+	playerName = strings.ToLower(playerName)
+	query := DB.Table("cricket_players AS player").
 		Select("player.player_name, pms.*").
 		Joins("LEFT JOIN player_match_stats AS pms ON pms.player_id = player.player_id").
-		Joins("LEFT JOIN cricket_matches matches ON matches.match_id = pms.match_id").
-		Where("(player_name = ? OR display_name = ?) AND league_id = ?", playerName, playerName, models.AllDuranzLeagues[league])
+		Joins("LEFT JOIN cricket_matches AS matches ON matches.match_id = pms.match_id").
+		Where("(LOWER(player.player_name) = ? OR LOWER(player.display_name) = ?) AND matches.league_id = ?", playerName, playerName, models.AllDuranzLeagues[league])
 
 	if season != "" {
 		if seasonID, err := strconv.ParseInt(season, 10, 64); err == nil && seasonID > 1950 {
@@ -28,31 +29,35 @@ func GetPlayerStats(playerName, league, season string, vsTeam int) []PlayerMatch
 
 	var results []PlayerMatchStats
 	if err := query.Find(&results).Error; err != nil {
-		panic(err)
+		fmt.Println("Query Execution Error:", err)
+		return nil
 	}
 
 	return results
 }
 
-func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []CricketMatch {
-	var objAllTeamStats []CricketMatch
+func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []MatchStatsExt {
+	var objAllTeamStats []MatchStatsExt
 
-	queryString := "(home_team_id = ? OR away_team_id = ?) AND gender = ?"
+	// Base query string
+	query := DB.Table("cricket_matches AS matches").
+		Joins("LEFT JOIN match_stats AS ms ON ms.match_id = matches.match_id").
+		Where("(home_team_id = ? OR away_team_id = ?) AND ms.team_id = ? AND LOWER(gender) = ? AND matches.result != 'no result'", teamID, teamID, teamID, gender)
+
+	// Add venue filter if provided
 	if venue != "" {
 		venueID := GetVenueIDbyName(venue)
-		queryString += fmt.Sprintf(" AND venue_id = %d", venueID)
+		query = query.Where("venue_id = ?", venueID)
 	}
 
+	// Add vsTeam filter if provided
 	if vsTeam != "" {
 		vsTeamID := GetTeamIDByTeamName(vsTeam)
-		queryString += fmt.Sprintf(" AND away_team_id = %d", vsTeamID)
+		query = query.Where("away_team_id = ?", vsTeamID)
 	}
 
-	query := DB.Model(&CricketMatch{}).
-		Where(queryString,
-			teamID, teamID, gender)
-
-	if err := query.Find(&objAllTeamStats).Error; err != nil {
+	// Execute query
+	if err := query.Select("matches.*, ms.*").Find(&objAllTeamStats).Error; err != nil {
 		panic(err)
 	}
 
@@ -62,7 +67,7 @@ func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []CricketMat
 func GetTeamIDByTeamName(teamName string) int {
 	var team Team
 	if err := DB.Select("team_id").
-		Where("team_name = ?", teamName).
+		Where("LOWER(team_name) = ?", teamName).
 		First(&team).Error; err != nil {
 		panic(err)
 	}

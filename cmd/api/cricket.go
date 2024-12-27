@@ -249,7 +249,7 @@ func PlayerStats(w http.ResponseWriter, r *http.Request) {
 	// playerFinal.SeasonType += pstat.SeasonType
 	outTypeCounter := make(map[string]int)
 	for _, pstat := range objAllPlayerStats {
-
+		playerFinal.MatchesPlayed++
 		// bind batting stats
 		playerFinal.Batting.BallsFaced += pstat.BallsFaced
 		// playerFinal.Batting.BattingOrder += pstat.BattingOrder
@@ -260,7 +260,9 @@ func PlayerStats(w http.ResponseWriter, r *http.Request) {
 		playerFinal.Batting.Singles += pstat.Singles
 		playerFinal.Batting.SixesHit += pstat.SixesHit
 		playerFinal.Batting.Triples += pstat.Triples
-		// playerFinal.Batting.IsBatted += pstat.IsBatted
+		if pstat.IsBatted {
+			playerFinal.Batting.IsBatted++
+		}
 		if pstat.RunsScored >= 100 {
 			playerFinal.Batting.Hundreds++
 		} else if pstat.RunsScored >= 50 {
@@ -352,7 +354,19 @@ func TeamStats(w http.ResponseWriter, r *http.Request) {
 	objAllTeamStats := data.GetTeamStats(teamID, gender, year, venue, vsTeam)
 	var teamStatistics models.DuranzTeamStats
 
+	var totalScore int
 	for _, objTeam := range objAllTeamStats {
+		totalScore += objTeam.Score
+
+		if objTeam.Score > teamStatistics.HighestScore.Runs {
+			teamStatistics.HighestScore.Runs = objTeam.Score
+			teamStatistics.HighestScore.Match = objTeam.Match.MatchID
+		}
+
+		if objTeam.Score < teamStatistics.LowestScore.Runs || teamStatistics.LowestScore.Runs == 0 {
+			teamStatistics.LowestScore.Runs = objTeam.Score
+			teamStatistics.LowestScore.Match = objTeam.Match.MatchID
+		}
 
 		if objTeam.TossWinner == teamID {
 			teamStatistics.TossWin++
@@ -382,15 +396,14 @@ func TeamStats(w http.ResponseWriter, r *http.Request) {
 	if teamStatistics.TotalMatches > 0 {
 		teamStatistics.MatchWinPercent = utils.Round(float64(teamStatistics.MatchWin)/float64(teamStatistics.TotalMatches), 0.01, 2) * 100
 		teamStatistics.TossWinPercent = utils.Round(float64(teamStatistics.TossWin)/float64(teamStatistics.TotalMatches), 0.01, 2) * 100
+
+		teamStatistics.AvgScoreInn = utils.Round(float64(totalScore)/float64(teamStatistics.TotalMatches), 0.01, 2)
 	}
 
 	if teamStatistics.MatchWin > 0 {
 		teamStatistics.ChasingWinPer = math.Round((float64(teamStatistics.ChasingWin)/float64(teamStatistics.MatchWin))*10000) / 100
 		teamStatistics.BatFirstWinPer = math.Round((float64(teamStatistics.BatFirstWin)/float64(teamStatistics.MatchWin))*10000) / 100
 	}
-	//AvgScore /Inn
-	//Highest Score
-	//Lowest Score
 
 	final := utils.JSONMessageWrappedObj(http.StatusOK, teamStatistics)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)

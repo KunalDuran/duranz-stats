@@ -169,3 +169,8 @@ type FileMapping struct {
 	OverStats   int       `gorm:"column:over_stats"`
 	DateAdded   time.Time `gorm:"column:dateadded;autoCreateTime"`
 }
+
+type MatchStatsExt struct {
+	CricketMatch
+	MatchStats
+}
