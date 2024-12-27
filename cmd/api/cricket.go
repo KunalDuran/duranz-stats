@@ -425,3 +425,25 @@ func TeamList(w http.ResponseWriter, r *http.Request) {
 	final := utils.JSONMessageWrappedObj(http.StatusOK, teamList)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
+
+func MatchList(w http.ResponseWriter, r *http.Request) {
+	team := utils.CleanText(r.URL.Query().Get("team"), true)
+	vsTeam := utils.CleanText(r.URL.Query().Get("vsteam"), true)
+
+	if team == "" && vsTeam == "" {
+		utils.WebResponseJSONObject(w, r, http.StatusBadRequest, []byte(`{"message":"missing required query param team or vsteam"}`))
+		return
+	}
+
+	teamID := data.GetTeamIDByTeamName(team)
+	vsTeamID := data.GetTeamIDByTeamName(vsTeam)
+
+	if teamID == 0 || vsTeamID == 0 {
+		utils.WebResponseJSONObject(w, r, http.StatusBadRequest, []byte(`{"message":"not found team or vsteam"}`))
+		return
+	}
+
+	matchList := data.GetMatchList(teamID, vsTeamID)
+	final := utils.JSONMessageWrappedObj(http.StatusOK, matchList)
+	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
+}

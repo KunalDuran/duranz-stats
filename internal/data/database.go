@@ -145,3 +145,13 @@ func GetTeamList() []string {
 
 	return teamList
 }
+
+func GetMatchList(team, vsTeam int) []CricketMatch {
+	var matchList []CricketMatch
+	if err := DB.Model(&CricketMatch{}).
+		Where("(home_team_id = ? AND away_team_id = ?) OR (home_team_id = ? AND away_team_id = ?)", team, vsTeam, team, vsTeam).
+		Find(&matchList).Error; err != nil {
+		panic(err)
+	}
+	return matchList
+}
