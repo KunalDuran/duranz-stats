@@ -15,17 +15,14 @@ func main() {
 	defer func() {
 		fmt.Println("Time taken:", time.Since(start))
 	}()
-	// dbUser := os.Getenv("DB_USER")
-	// dbPass := os.Getenv("DB_PASS")
-	// dbHost := os.Getenv("DB_HOST")
-	// dbPort := os.Getenv("DB_PORT")
-	dbHost := "localhost"
-	dbPort := 3306
-	dbUser := "root"
-	dbName := "duranz"
-	dbPass := ""
 
-	err := data.InitDB(dbHost, dbUser, dbPass, dbName, dbPort)
+	dbHost := "localhost"
+	dbPort := 5432
+	dbUser := "postgres"
+	dbName := "duranz"
+	dbPass := "password"
+
+	err := data.InitDB(dbHost, dbUser, dbPass, dbName, "postgres", dbPort)
 	if err != nil {
 		log.Fatal(err)
 		return

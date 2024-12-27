@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -21,19 +22,38 @@ const LEAGUE_NOT_FOUND = "8"
 var DB *gorm.DB
 
 // InitDB initializes the database connection
-func InitDB(host, user, password, dbname string, port int) error {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
-		user,
-		password,
-		host,
-		port,
-		dbname,
-	)
+func InitDB(host, user, password, dbname, dbType string, port int) error {
 
-	var err error
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return fmt.Errorf("failed to connect to database: %v", err)
+	switch dbType {
+	case "postgres":
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
+			host,
+			user,
+			password,
+			dbname,
+			port,
+		)
+
+		var err error
+		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err != nil {
+			return fmt.Errorf("failed to connect to database: %v", err)
+		}
+
+	case "mysql":
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+			user,
+			password,
+			host,
+			port,
+			dbname,
+		)
+
+		var err error
+		DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		if err != nil {
+			return fmt.Errorf("failed to connect to database: %v", err)
+		}
 	}
 
 	log.Println("Connected to database successfully")

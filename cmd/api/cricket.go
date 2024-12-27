@@ -30,7 +30,7 @@ func GetCricsheetData(f_path string) (models.Match, error) {
 	return matchData, nil
 }
 
-func GetScoreCard(w http.ResponseWriter, r *http.Request) {
+func MatchStats(w http.ResponseWriter, r *http.Request) {
 	jsonID := chi.URLParam(r, "file")
 	match, err := GetCricsheetData(DATASET_BASE + jsonID + `.json`)
 	if err != nil {
@@ -203,7 +203,7 @@ func GetScoreCard(w http.ResponseWriter, r *http.Request) {
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 
-func PlayerStatsAPI(w http.ResponseWriter, r *http.Request) {
+func PlayerStats(w http.ResponseWriter, r *http.Request) {
 	playerName := chi.URLParam(r, "player")
 	bio := r.URL.Query().Get("bio")
 	format := utils.CleanText(r.URL.Query().Get("format"), true)
@@ -338,7 +338,7 @@ func PlayerStatsAPI(w http.ResponseWriter, r *http.Request) {
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 
-func TeamStatsAPI(w http.ResponseWriter, r *http.Request) {
+func TeamStats(w http.ResponseWriter, r *http.Request) {
 	teamName := chi.URLParam(r, "team")
 	gender := utils.CleanText(r.URL.Query().Get("gender"), true)
 	if gender == "" {
@@ -396,10 +396,6 @@ func TeamStatsAPI(w http.ResponseWriter, r *http.Request) {
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 
-func BatsmanVSBowlerAPI(w http.ResponseWriter, r *http.Request) {
-	//
-}
-
 func PlayerList(w http.ResponseWriter, r *http.Request) {
 	matchCount := utils.CleanText(r.URL.Query().Get("cnt"), true)
 	if matchCount == "" {
@@ -415,18 +411,4 @@ func TeamList(w http.ResponseWriter, r *http.Request) {
 	teamList := data.GetTeamList()
 	final := utils.JSONMessageWrappedObj(http.StatusOK, teamList)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
-}
-
-func MatchList(w http.ResponseWriter, r *http.Request) {
-	// year := utils.CleanText(r.URL.Query().Get("year"), true)
-	// format := utils.CleanText(r.URL.Query().Get("format"), true)
-	// team := utils.CleanText(r.URL.Query().Get("team"), true)
-	// matchList := data.GetMatchList(year, format, team)
-	// final := utils.JSONMessageWrappedObj(http.StatusOK, matchList)
-	// utils.WebResponseJSONObject(w, r, http.StatusOK, final)
-}
-
-func PlayerVSPlayer(w http.ResponseWriter, r *http.Request) {
-	// playerName := chi.URLParam(r, "player")
-
 }

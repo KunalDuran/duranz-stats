@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/KunalDuran/duranz-stats/internal/models"
-	_ "github.com/go-sql-driver/mysql" // MySQL driver
 )
 
 func GetPlayerStats(playerName, league, season string, vsTeam int) []PlayerMatchStats {

@@ -10,7 +10,6 @@ import (
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 var PWD, _ = os.Getwd()
@@ -20,13 +19,13 @@ var DATASET_BASE = PWD + `/datasets/odis_json/`
 func main() {
 
 	dbHost := "localhost"
-	dbPort := 3306
-	dbUser := "root"
+	dbPort := 5432
+	dbUser := "postgres"
 	dbName := "duranz"
-	dbPass := ""
+	dbPass := "password"
 	port := ":5000"
 
-	err := data.InitDB(dbHost, dbUser, dbPass, dbName, dbPort)
+	err := data.InitDB(dbHost, dbUser, dbPass, dbName, "postgres", dbPort)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -51,6 +50,7 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+
 	addRouteHandlers(router)
 
 	fmt.Println("Duranz API initialized")

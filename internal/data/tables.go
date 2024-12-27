@@ -7,7 +7,7 @@ import (
 type CricketMatch struct {
 	MatchID           int       `gorm:"column:match_id;primaryKey;autoIncrement"`
 	LeagueID          int       `gorm:"column:league_id"`
-	Gender            string    `gorm:"column:gender;type:ENUM('Male','Female')"`
+	Gender            string    `gorm:"column:gender"`
 	SeasonID          int       `gorm:"column:season_id"`
 	HomeTeamID        int       `gorm:"column:home_team_id"`
 	AwayTeamID        int       `gorm:"column:away_team_id"`
@@ -17,7 +17,7 @@ type CricketMatch struct {
 	Result            string    `gorm:"column:result;size:200"`
 	ManOfTheMatch     int       `gorm:"column:man_of_the_match"`
 	TossWinner        int       `gorm:"column:toss_winner"`
-	TossDecision      string    `gorm:"column:toss_decision;type:ENUM('Bat','Field')"`
+	TossDecision      string    `gorm:"column:toss_decision"`
 	WinningTeam       int       `gorm:"column:winning_team"`
 	CricsheetFileName string    `gorm:"column:cricsheet_file_name;size:20"`
 	MatchDate         time.Time `gorm:"column:match_date"`
