@@ -3,7 +3,6 @@ package mapper
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	"github.com/KunalDuran/duranz-stats/internal/models"
+	"github.com/KunalDuran/duranz-stats/internal/utils"
 )
 
 // GetCricsheetData : Reads the match json file
@@ -29,28 +29,36 @@ func GetCricsheetData(f_path string) (models.Match, error) {
 	return matchData, nil
 }
 
-// PENDING
-func processScoreCard() {
-	match, err := GetCricsheetData(`C:\Users\Kunal\Desktop\Duranz\duranz_api\matchdata\odis_json\433606.json`)
+func ScorecardMapper(match models.Match, fileName string) error {
+	cricSheetID := strings.Replace(fileName, ".json", "", -1)
+	sheetID, err := strconv.Atoi(cricSheetID)
 	if err != nil {
-		fmt.Println(err.Error())
+		return err
 	}
+	matchID := data.GetMatchID(cricSheetID)
 
-	// Map the VENUES
-	// VenueMapper(match.Info.Venue, match.Info.City)
+	scorecard := ProcessScoreCard(match)
+	scorecard.MatchID = matchID
 
-	// MAP THE TEAMS
+	scorecard.CricsheetID = sheetID
 
-	// MAP THE PLAYERS
+	if err := data.InsertScoreCard(scorecard); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
 
+func ProcessScoreCard(match models.Match) models.ScoreCard {
 	var objScoreCard models.ScoreCard
-
 	var AllInnings []models.Innings
 	for _, inning := range match.Innings {
 		fmt.Println("Scorecard process started innings for : ", inning.Team)
 
 		var objInning models.Innings
 		objInning.InningDetail = inning.Team
+
+		partnerships := make(map[int]models.Partnership)
 
 		var objExtra models.Extras
 		var objBatsman = map[string]models.BattingStats{}
@@ -73,10 +81,22 @@ func processScoreCard() {
 					tempBat.BattingOrder = batsmanCount
 					tempBat.Name = delivery.Batter
 					objBatsman[delivery.Batter] = tempBat
+
 				}
 				batsman := objBatsman[delivery.Batter]
 				batsman.Runs += delivery.Runs.Batter
 				batsman.Balls += 1
+
+				//partnership
+				if _, ok := partnerships[wicketCnt]; !ok {
+					partnerships[wicketCnt] = models.Partnership{
+						Batsman1: delivery.Batter,
+						Batsman2: delivery.NonStriker,
+					}
+				}
+				partner := partnerships[wicketCnt]
+				partner.Runs += delivery.Runs.Total
+				partnerships[wicketCnt] = partner
 
 				// Bowler Init
 				if _, exist := objBowler[delivery.Bowler]; !exist {
@@ -152,7 +172,7 @@ func processScoreCard() {
 		var allBatsman []models.BattingStats
 		for _, batter := range objBatsman {
 			if batter.Balls > 0 {
-				batter.StrikeRate = math.Round((float64(batter.Runs)*100)/float64(batter.Balls)/0.01) * 0.01
+				batter.StrikeRate = utils.Round((float64(batter.Runs)*100)/float64(batter.Balls), 0.01, 2)
 			}
 			if batter.Out == "" {
 				batter.Out = "not out"
@@ -163,7 +183,7 @@ func processScoreCard() {
 		var allBowler []models.BowlingStats
 		for _, bowler := range objBowler {
 			if bowler.Balls > 0 {
-				bowler.Economy = math.Round(float64(bowler.Runs)/(float64(bowler.Balls)/float64(6))/0.01) * 0.01
+				bowler.Economy = utils.Round(float64(bowler.Runs)/(float64(bowler.Balls)/float64(6)), 0.01, 2)
 			}
 			bowler.Overs = fmt.Sprint(bowler.Balls/6) + "." + fmt.Sprint(bowler.Balls%6)
 			allBowler = append(allBowler, bowler)
@@ -175,6 +195,8 @@ func processScoreCard() {
 		objInning.FallOfWickets = strings.Join(fowArr, " , ")
 		objInning.Bowling = allBowler
 
+		objInning.Partnerships = partnerships
+		objInning.OverByOver = overRuns
 		AllInnings = append(AllInnings, objInning)
 	}
 
@@ -187,12 +209,7 @@ func processScoreCard() {
 	objScoreCard.Result = resultStr
 	objScoreCard.Innings = AllInnings
 
-	strScoreCard, err := json.MarshalIndent(objScoreCard, "", "  ")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	os.WriteFile(`C:\Users\Kunal\Desktop\Duranz\duranz_api\scoreCard.json`, strScoreCard, 0777)
+	return objScoreCard
 }
 
 func ProcessPlayerStats(match models.Match, fileName string) {

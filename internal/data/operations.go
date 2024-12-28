@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -238,4 +239,17 @@ func PseudoCacheLayer(teamType string) {
 	for _, venue := range venues {
 		MappedVenues[venue.VenueName] = venue.City
 	}
+}
+
+func InsertScoreCard(scoreCard models.ScoreCard) error {
+	scorecard := MatchScoreCard{
+		CricsheetID: scoreCard.CricsheetID,
+		MatchID:     scoreCard.MatchID,
+		Data:        json.RawMessage([]byte(`{"name": "value"}`)),
+	}
+
+	if err := DB.Create(&scorecard).Error; err != nil {
+		return err
+	}
+	return nil
 }

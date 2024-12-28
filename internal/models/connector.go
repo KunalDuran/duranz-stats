@@ -110,4 +110,5 @@ type MappingInfo struct {
 	Match       bool
 	MatchStats  bool
 	PlayerStats bool
+	ScoreCard   bool
 }

@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -168,6 +169,13 @@ type FileMapping struct {
 	PlayerStats bool      `gorm:"column:player_stats"`
 	OverStats   int       `gorm:"column:over_stats"`
 	DateAdded   time.Time `gorm:"column:dateadded;autoCreateTime"`
+}
+
+type MatchScoreCard struct {
+	ID          uint            `gorm:"primaryKey"`
+	CricsheetID int             `gorm:"column:cricsheet_id"`
+	MatchID     int             `gorm:"column:match_id"`
+	Data        json.RawMessage `gorm:"type:json"`
 }
 
 type MatchStatsExt struct {
