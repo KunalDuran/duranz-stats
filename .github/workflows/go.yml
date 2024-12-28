@@ -1,0 +1,28 @@
+name: Go Build and Deploy as a Service
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+
+    - name: Build the Go server
+      run: go build -v ./cmd/api
+
+    - name: Deploy binary to the server
+      run: sudo systemctl restart dronnayak.service
+
+    - name: Check service status
+      run: sudo systemctl status dronnayak.service
