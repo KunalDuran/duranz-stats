@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/KunalDuran/duranz-stats/internal/models"
+	"github.com/KunalDuran/duranz-stats/internal/utils"
 )
 
 func GetPlayerStats(playerName, league, season string, vsTeam int) []PlayerMatchStats {
@@ -42,7 +43,7 @@ func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []MatchStats
 	// Base query string
 	query := DB.Table("cricket_matches AS matches").
 		Joins("LEFT JOIN match_stats AS ms ON ms.match_id = matches.match_id").
-		Where("(home_team_id = ? OR away_team_id = ?) AND ms.team_id = ? AND LOWER(gender) = ? AND matches.result != 'no result'", teamID, teamID, teamID, gender)
+		Where("(home_team_id = ? OR away_team_id = ?) AND ms.team_id = ? AND LOWER(gender) = ? AND matches.result != 'no result'", teamID, teamID, teamID, utils.CleanText(gender, true))
 
 	// Add venue filter if provided
 	if venue != "" {
@@ -67,7 +68,7 @@ func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []MatchStats
 func GetTeamIDByTeamName(teamName string) int {
 	var team Team
 	if err := DB.Select("team_id").
-		Where("LOWER(team_name) = ?", teamName).
+		Where("LOWER(team_name) = ?", utils.CleanText(teamName, true)).
 		First(&team).Error; err != nil {
 		panic(err)
 	}

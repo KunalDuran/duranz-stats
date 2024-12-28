@@ -40,7 +40,7 @@ func main() {
 		data.CreateTables()
 	case "delete":
 		data.TruncateTables()
-	case "venue", "team", "player", "match", "matchstats", "playerstats", "all":
+	case "venue", "team", "player", "match", "matchstats", "playerstats", "scorecard", "all":
 		process(command, os.Args[2:])
 	default:
 		fmt.Println("Unknown command:", command)

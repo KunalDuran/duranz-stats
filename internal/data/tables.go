@@ -167,6 +167,7 @@ type FileMapping struct {
 	Matches     bool      `gorm:"column:matches"`
 	MatchStats  bool      `gorm:"column:match_stats"`
 	PlayerStats bool      `gorm:"column:player_stats"`
+	ScoreCard   bool      `gorm:"column:scorecard"`
 	OverStats   int       `gorm:"column:over_stats"`
 	DateAdded   time.Time `gorm:"column:dateadded;autoCreateTime"`
 }

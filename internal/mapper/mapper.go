@@ -53,7 +53,7 @@ func ProcessScoreCard(match models.Match) models.ScoreCard {
 	var objScoreCard models.ScoreCard
 	var AllInnings []models.Innings
 	for _, inning := range match.Innings {
-		fmt.Println("Scorecard process started innings for : ", inning.Team)
+		// fmt.Println("Scorecard process started innings for : ", inning.Team)
 
 		var objInning models.Innings
 		objInning.InningDetail = inning.Team

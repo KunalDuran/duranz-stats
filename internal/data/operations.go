@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/KunalDuran/duranz-stats/internal/models"
+	"github.com/KunalDuran/duranz-stats/internal/utils"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -69,7 +70,7 @@ func GetVenueID(venueName, city string) int {
 
 func GetVenueIDbyName(venueName string) int {
 	var venue Venue
-	if err := DB.Select("venue_id").Where("LOWER(venue_name) = ?", venueName).First(&venue).Error; err != nil {
+	if err := DB.Select("venue_id").Where("LOWER(venue_name) = ?", utils.CleanText(venueName, true)).First(&venue).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
 		}
@@ -77,8 +78,10 @@ func GetVenueIDbyName(venueName string) int {
 	}
 	return venue.VenueID
 }
+
 func GetTeamID(teamName, teamType string) int {
 	var team Team
+	teamName = utils.CleanText(teamName, true)
 	if err := DB.Select("team_id").Where("LOWER(team_name) = ? AND team_type = ?", teamName, teamType).First(&team).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			panic(err)
@@ -147,6 +150,7 @@ func GetMappingDetails() map[string]models.MappingInfo {
 			Match:       mapping.Matches,
 			MatchStats:  mapping.MatchStats,
 			PlayerStats: mapping.PlayerStats,
+			ScoreCard:   mapping.ScoreCard,
 		}
 	}
 

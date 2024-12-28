@@ -72,6 +72,7 @@ func CreateTables() error {
 		&PlayerMatchStats{},
 		&ErrorLog{},
 		&FileMapping{},
+		&MatchScoreCard{},
 	}
 
 	// Create tables
@@ -87,7 +88,7 @@ func CreateTables() error {
 }
 
 // TruncateTables deletes all data from the tables while maintaining the structure
-func TruncateTables() error {
+func TruncateTablesMySQL() error {
 	// Disable foreign key checks
 	err := DB.Exec("SET FOREIGN_KEY_CHECKS = 0").Error
 	if err != nil {
@@ -104,6 +105,7 @@ func TruncateTables() error {
 		&Venue{},
 		&ErrorLog{},
 		&FileMapping{},
+		&MatchScoreCard{},
 	}
 
 	// Truncate each table
@@ -118,6 +120,45 @@ func TruncateTables() error {
 	err = DB.Exec("SET FOREIGN_KEY_CHECKS = 1").Error
 	if err != nil {
 		return fmt.Errorf("failed to enable foreign key checks: %v", err)
+	}
+
+	log.Println("All tables truncated successfully")
+	return nil
+}
+
+func TruncateTables() error {
+	// Start a transaction
+	tx := DB.Begin()
+	if tx.Error != nil {
+		return fmt.Errorf("failed to begin transaction: %v", tx.Error)
+	}
+
+	// List of tables in order (considering dependencies)
+	tables := []string{
+		"player_match_stats",
+		"match_stats",
+		"cricket_matches",
+		"cricket_players",
+		"teams",
+		"venues",
+		"error_logs",
+		"file_mappings",
+		"match_score_cards",
+	}
+
+	// Truncate each table with CASCADE to handle dependencies
+	for _, table := range tables {
+		query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", table)
+		err := tx.Exec(query).Error
+		if err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to truncate table %s: %v", table, err)
+		}
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("failed to commit transaction: %v", err)
 	}
 
 	log.Println("All tables truncated successfully")

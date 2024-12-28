@@ -26,15 +26,8 @@ func CleanText(text string, lowerCase bool) string {
 	if lowerCase {
 		sanitizedText = strings.ToLower(sanitizedText)
 	}
-	for {
-		if strings.Contains(sanitizedText, "  ") {
-			sanitizedText = strings.Replace(sanitizedText, "  ", " ", -1)
-		} else {
-			break
-		}
-	}
 
-	return sanitizedText
+	return strings.TrimSpace(sanitizedText)
 }
 
 // PrintJSON prints a json object nicely

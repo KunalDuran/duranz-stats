@@ -92,7 +92,7 @@ func RunAllProcess(process, fileName string) {
 		}
 
 		if process == "scorecard" || process == "all" {
-			mapper.ProcessScoreCard(match)
+			mapper.ScorecardMapper(match, file)
 			mappingInfo.ScoreCard = true
 		}
 
