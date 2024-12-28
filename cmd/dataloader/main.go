@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/KunalDuran/duranz-stats/internal/data"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -16,11 +18,15 @@ func main() {
 		fmt.Println("Time taken:", time.Since(start))
 	}()
 
-	dbHost := "localhost"
-	dbPort := 5432
-	dbUser := "postgres"
-	dbName := "duranz"
-	dbPass := "password"
+	godotenv.Read(".env")
+
+	dbHost := os.Getenv("DB_HOST")
+	dbPort, _ := strconv.Atoi(os.Getenv("DB_PORT"))
+	dbUser := os.Getenv("DB_USER")
+	dbName := os.Getenv("DB_NAME")
+	dbPass := os.Getenv("DB_PASS")
+
+	fmt.Println("DB_HOST:", dbHost)
 
 	err := data.InitDB(dbHost, dbUser, dbPass, dbName, "postgres", dbPort)
 	if err != nil {

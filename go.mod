@@ -6,6 +6,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/go-chi/cors v1.2.1
 	github.com/gomodule/redigo v1.9.2
+	github.com/joho/godotenv v1.5.1
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12

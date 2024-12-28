@@ -22,7 +22,7 @@ jobs:
       run: go build -v ./cmd/api
 
     - name: Deploy binary to the server
-      run: sudo systemctl restart dronnayak.service
+      run: sudo systemctl restart duranz-stats.service
 
     - name: Check service status
-      run: sudo systemctl status dronnayak.service
+      run: sudo systemctl status duranz-stats.service

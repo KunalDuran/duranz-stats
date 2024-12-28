@@ -5,11 +5,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/KunalDuran/duranz-stats/internal/cache"
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
+	"github.com/joho/godotenv"
 )
 
 var PWD, _ = os.Getwd()
@@ -18,12 +20,16 @@ var DATASET_BASE = PWD + `/datasets/odis_json/`
 
 func main() {
 
-	dbHost := "localhost"
-	dbPort := 5432
-	dbUser := "postgres"
-	dbName := "duranz"
-	dbPass := "password"
-	port := ":5000"
+	if err := godotenv.Load(); err != nil {
+		panic(err.Error())
+	}
+
+	port := os.Getenv("PORT")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort, _ := strconv.Atoi(os.Getenv("DB_PORT"))
+	dbUser := os.Getenv("DB_USER")
+	dbName := os.Getenv("DB_NAME")
+	dbPass := os.Getenv("DB_PASS")
 
 	err := data.InitDB(dbHost, dbUser, dbPass, dbName, "postgres", dbPort)
 	if err != nil {
