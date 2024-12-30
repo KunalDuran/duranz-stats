@@ -123,6 +123,7 @@ func InsertMappingInfo(fileName string, mappingInfo models.MappingInfo) {
 		Matches:     mappingInfo.Match,
 		MatchStats:  mappingInfo.MatchStats,
 		PlayerStats: mappingInfo.PlayerStats,
+		ScoreCard:   mappingInfo.ScoreCard,
 	}
 
 	if err := DB.Clauses(clause.OnConflict{
@@ -246,10 +247,11 @@ func PseudoCacheLayer(teamType string) {
 }
 
 func InsertScoreCard(scoreCard models.ScoreCard) error {
+	scorecardBytes, _ := json.Marshal(scoreCard)
 	scorecard := MatchScoreCard{
 		CricsheetID: scoreCard.CricsheetID,
 		MatchID:     scoreCard.MatchID,
-		Data:        json.RawMessage([]byte(`{"name": "value"}`)),
+		Data:        json.RawMessage(scorecardBytes),
 	}
 
 	if err := DB.Create(&scorecard).Error; err != nil {

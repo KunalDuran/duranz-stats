@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/KunalDuran/duranz-stats/internal/data"
-	"github.com/KunalDuran/duranz-stats/internal/mapper"
 	"github.com/KunalDuran/duranz-stats/internal/models"
 	"github.com/KunalDuran/duranz-stats/internal/utils"
 	"github.com/go-chi/chi/v5"
@@ -32,14 +31,10 @@ func GetCricsheetData(f_path string) (models.Match, error) {
 }
 
 func MatchStats(w http.ResponseWriter, r *http.Request) {
-	jsonID := chi.URLParam(r, "file")
-	match, err := GetCricsheetData(DATASET_BASE + jsonID + `.json`)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	objScoreCard := mapper.ProcessScoreCard(match)
-	final := utils.JSONMessageWrappedObj(http.StatusOK, objScoreCard)
+	cricsheetID := chi.URLParam(r, "file")
+	objScoreCard := data.GetMatchScoreCard(cricsheetID)
+	// objScoreCard := mapper.ProcessScoreCard(match)
+	final := utils.JSONMessageWrappedObj(http.StatusOK, objScoreCard.Data)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
 

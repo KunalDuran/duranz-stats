@@ -161,22 +161,22 @@ type FileMapping struct {
 	FileID      int       `gorm:"column:file_id;primaryKey;autoIncrement"`
 	FileName    string    `gorm:"column:file_name;unique"`
 	LeagueID    int       `gorm:"column:league_id"`
-	Teams       bool      `gorm:"column:teams"`
-	Players     bool      `gorm:"column:players"`
-	Venue       bool      `gorm:"column:venue"`
-	Matches     bool      `gorm:"column:matches"`
-	MatchStats  bool      `gorm:"column:match_stats"`
-	PlayerStats bool      `gorm:"column:player_stats"`
-	ScoreCard   bool      `gorm:"column:scorecard"`
+	Teams       bool      `gorm:"column:teams;default:false"`
+	Players     bool      `gorm:"column:players;default:false"`
+	Venue       bool      `gorm:"column:venue;default:false"`
+	Matches     bool      `gorm:"column:matches;default:false"`
+	MatchStats  bool      `gorm:"column:match_stats;default:false"`
+	PlayerStats bool      `gorm:"column:player_stats;default:false"`
+	ScoreCard   bool      `gorm:"column:scorecard;default:false"`
 	OverStats   int       `gorm:"column:over_stats"`
 	DateAdded   time.Time `gorm:"column:dateadded;autoCreateTime"`
 }
 
 type MatchScoreCard struct {
-	ID          uint            `gorm:"primaryKey"`
-	CricsheetID int             `gorm:"column:cricsheet_id"`
-	MatchID     int             `gorm:"column:match_id"`
-	Data        json.RawMessage `gorm:"type:json"`
+	ID          uint            `gorm:"primaryKey" json:"id"`
+	CricsheetID int             `gorm:"column:cricsheet_id" json:"cricsheet_id"`
+	MatchID     int             `gorm:"column:match_id" json:"match_id"`
+	Data        json.RawMessage `gorm:"type:json" json:"data"`
 }
 
 type MatchStatsExt struct {

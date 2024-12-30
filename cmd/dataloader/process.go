@@ -119,11 +119,13 @@ func ListFiles(path string) []string {
 
 func GetNewFiles(allFiles []string) []string {
 	objMappingDetails := data.GetMappingDetails()
-
 	var newFiles []string
 
 	for _, file := range allFiles {
-		if _, exist := objMappingDetails[file]; !exist {
+		if row, exist := objMappingDetails[file]; !exist {
+			if row.Match && row.MatchStats && row.PlayerStats && row.ScoreCard && row.Teams && row.Venue && row.Players {
+				continue
+			}
 			newFiles = append(newFiles, file)
 		}
 	}

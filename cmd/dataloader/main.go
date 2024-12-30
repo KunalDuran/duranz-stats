@@ -18,7 +18,9 @@ func main() {
 		fmt.Println("Time taken:", time.Since(start))
 	}()
 
-	godotenv.Read(".env")
+	if err := godotenv.Load(); err != nil {
+		panic(err.Error())
+	}
 
 	dbHost := os.Getenv("DB_HOST")
 	dbPort, _ := strconv.Atoi(os.Getenv("DB_PORT"))

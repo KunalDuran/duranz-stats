@@ -156,3 +156,13 @@ func GetMatchList(team, vsTeam int) []CricketMatch {
 	}
 	return matchList
 }
+
+func GetMatchScoreCard(cricsheetID string) MatchScoreCard {
+	var matchScoreCard MatchScoreCard
+	if err := DB.Model(&MatchScoreCard{}).
+		Where("cricsheet_id = ?", cricsheetID).
+		Find(&matchScoreCard).Error; err != nil {
+		panic(err)
+	}
+	return matchScoreCard
+}
