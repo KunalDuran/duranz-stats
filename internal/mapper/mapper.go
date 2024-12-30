@@ -52,6 +52,11 @@ func ScorecardMapper(match models.Match, fileName string) error {
 func ProcessScoreCard(match models.Match) models.ScoreCard {
 	var objScoreCard models.ScoreCard
 	var AllInnings []models.Innings
+
+	objScoreCard.Event = match.Info.Event.Name
+	objScoreCard.MatchNumber = match.Info.Event.MatchNumber
+	objScoreCard.Date = strings.Join(match.Info.Dates, ",")
+
 	for _, inning := range match.Innings {
 		// fmt.Println("Scorecard process started innings for : ", inning.Team)
 

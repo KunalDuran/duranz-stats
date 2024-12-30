@@ -12,6 +12,7 @@ type ScoreCard struct {
 	MatchID     int       `json:"match_id"`
 	CricsheetID int       `json:"cricsheet_id"`
 	Event       string    `json:"event"`
+	MatchNumber int       `json:"match_number"`
 	Date        string    `json:"date"`
 	Innings     []Innings `json:"innings"`
 	Result      string    `json:"result"`

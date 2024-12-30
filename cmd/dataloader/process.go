@@ -122,10 +122,9 @@ func GetNewFiles(allFiles []string) []string {
 	var newFiles []string
 
 	for _, file := range allFiles {
-		if row, exist := objMappingDetails[file]; !exist {
-			if row.Match && row.MatchStats && row.PlayerStats && row.ScoreCard && row.Teams && row.Venue && row.Players {
-				continue
-			}
+		row, exist := objMappingDetails[file]
+		colExist := row.Match && row.MatchStats && row.PlayerStats && row.ScoreCard && row.Teams && row.Venue && row.Players
+		if !exist || !colExist {
 			newFiles = append(newFiles, file)
 		}
 	}
