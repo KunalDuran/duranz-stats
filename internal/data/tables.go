@@ -6,89 +6,89 @@ import (
 )
 
 type CricketMatch struct {
-	MatchID           int       `gorm:"column:match_id;primaryKey;autoIncrement"`
-	LeagueID          int       `gorm:"column:league_id"`
-	Gender            string    `gorm:"column:gender"`
-	SeasonID          int       `gorm:"column:season_id"`
-	HomeTeamID        int       `gorm:"column:home_team_id"`
-	AwayTeamID        int       `gorm:"column:away_team_id"`
-	HomeTeamName      string    `gorm:"column:home_team_name;size:120"`
-	AwayTeamName      string    `gorm:"column:away_team_name;size:120"`
-	VenueID           int       `gorm:"column:venue_id"`
-	Result            string    `gorm:"column:result;size:200"`
-	ManOfTheMatch     int       `gorm:"column:man_of_the_match"`
-	TossWinner        int       `gorm:"column:toss_winner"`
-	TossDecision      string    `gorm:"column:toss_decision"`
-	WinningTeam       int       `gorm:"column:winning_team"`
-	CricsheetFileName string    `gorm:"column:cricsheet_file_name;size:20"`
-	MatchDate         time.Time `gorm:"column:match_date"`
-	MatchDateMulti    string    `gorm:"column:match_date_multi;size:120"`
-	MatchTime         time.Time `gorm:"column:match_time"`
-	IsReschedule      bool      `gorm:"column:is_reschedule;default:false"`
-	IsAbandoned       bool      `gorm:"column:is_abandoned;default:false"`
-	IsNeutral         bool      `gorm:"column:is_neutral;default:false"`
-	MatchRefrees      string    `gorm:"column:match_refrees;size:100"`
-	ReserveUmpires    string    `gorm:"column:reserve_umpires;size:100"`
-	TVUmpires         string    `gorm:"column:tv_umpires;size:100"`
-	Umpires           string    `gorm:"column:umpires;size:100"`
-	DateAdded         time.Time `gorm:"column:date_added;autoCreateTime"`
-	LastUpdate        time.Time `gorm:"column:last_update;autoUpdateTime"`
-	MatchEndTime      time.Time `gorm:"column:match_end_time"`
-	Status            string    `gorm:"column:status;size:2"`
+	MatchID           int       `gorm:"column:match_id;primaryKey;autoIncrement" json:"match_id"`
+	LeagueID          int       `gorm:"column:league_id" json:"league_id"`
+	Gender            string    `gorm:"column:gender" json:"gender"`
+	SeasonID          int       `gorm:"column:season_id" json:"season_id"`
+	HomeTeamID        int       `gorm:"column:home_team_id" json:"home_team_id"`
+	AwayTeamID        int       `gorm:"column:away_team_id" json:"away_team_id"`
+	HomeTeamName      string    `gorm:"column:home_team_name;size:120" json:"home_team_name"`
+	AwayTeamName      string    `gorm:"column:away_team_name;size:120" json:"away_team_name"`
+	VenueID           int       `gorm:"column:venue_id" json:"venue_id"`
+	Result            string    `gorm:"column:result;size:200" json:"result"`
+	ManOfTheMatch     int       `gorm:"column:man_of_the_match" json:"man_of_the_match"`
+	TossWinner        int       `gorm:"column:toss_winner" json:"toss_winner"`
+	TossDecision      string    `gorm:"column:toss_decision" json:"toss_decision"`
+	WinningTeam       int       `gorm:"column:winning_team" json:"winning_team"`
+	CricsheetFileName string    `gorm:"column:cricsheet_file_name;size:20" json:"cricsheet_file_name"`
+	MatchDate         time.Time `gorm:"column:match_date" json:"match_date"`
+	MatchDateMulti    string    `gorm:"column:match_date_multi;size:120" json:"match_date_multi"`
+	MatchTime         time.Time `gorm:"column:match_time" json:"match_time"`
+	IsReschedule      bool      `gorm:"column:is_reschedule;default:false" json:"is_reschedule"`
+	IsAbandoned       bool      `gorm:"column:is_abandoned;default:false" json:"is_abandoned"`
+	IsNeutral         bool      `gorm:"column:is_neutral;default:false" json:"is_neutral"`
+	MatchRefrees      string    `gorm:"column:match_refrees;size:100" json:"match_refrees"`
+	ReserveUmpires    string    `gorm:"column:reserve_umpires;size:100" json:"reserve_umpires"`
+	TVUmpires         string    `gorm:"column:tv_umpires;size:100" json:"tv_umpires"`
+	Umpires           string    `gorm:"column:umpires;size:100" json:"umpires"`
+	DateAdded         time.Time `gorm:"column:date_added;autoCreateTime" json:"date_added"`
+	LastUpdate        time.Time `gorm:"column:last_update;autoUpdateTime" json:"last_update"`
+	MatchEndTime      time.Time `gorm:"column:match_end_time" json:"match_end_time"`
+	Status            string    `gorm:"column:status;size:2" json:"status"`
 }
 
 type CricketPlayer struct {
-	PlayerID        int       `gorm:"column:player_id;primaryKey;autoIncrement"`
-	PlayerName      string    `gorm:"column:player_name"`
-	DisplayName     string    `gorm:"column:display_name"`
-	FirstName       string    `gorm:"column:first_name"`
-	LastName        string    `gorm:"column:last_name"`
-	ShortName       string    `gorm:"column:short_name"`
-	UniqueShortName string    `gorm:"column:unique_short_name"`
-	DOB             time.Time `gorm:"column:dob"`
-	BattingStyle    string    `gorm:"column:batting_style"`
-	BowlingStyle    string    `gorm:"column:bowling_style"`
-	IsOverseas      bool      `gorm:"column:is_overseas;default:false"`
-	CricsheetID     string    `gorm:"column:cricsheet_id;unique"`
-	DateAdded       time.Time `gorm:"column:date_added;autoCreateTime"`
-	Status          bool      `gorm:"column:status;default:true"`
+	PlayerID        int       `gorm:"column:player_id;primaryKey;autoIncrement" json:"player_id"`
+	PlayerName      string    `gorm:"column:player_name" json:"player_name"`
+	DisplayName     string    `gorm:"column:display_name" json:"display_name"`
+	FirstName       string    `gorm:"column:first_name" json:"first_name"`
+	LastName        string    `gorm:"column:last_name" json:"last_name"`
+	ShortName       string    `gorm:"column:short_name" json:"short_name"`
+	UniqueShortName string    `gorm:"column:unique_short_name" json:"unique_short_name"`
+	DOB             time.Time `gorm:"column:dob" json:"dob"`
+	BattingStyle    string    `gorm:"column:batting_style" json:"batting_style"`
+	BowlingStyle    string    `gorm:"column:bowling_style" json:"bowling_style"`
+	IsOverseas      bool      `gorm:"column:is_overseas;default:false" json:"is_overseas"`
+	CricsheetID     string    `gorm:"column:cricsheet_id;unique" json:"cricsheet_id"`
+	DateAdded       time.Time `gorm:"column:date_added;autoCreateTime" json:"date_added"`
+	Status          bool      `gorm:"column:status;default:true" json:"status"`
 }
 
 type Team struct {
-	TeamID       int       `gorm:"column:team_id;primaryKey;autoIncrement"`
-	TeamName     string    `gorm:"column:team_name;not null"`
-	TeamType     string    `gorm:"column:team_type;not null"`
-	Filtername   string    `gorm:"column:filtername"`
-	Abbreviation string    `gorm:"column:abbreviation;size:4"`
-	TeamColor    string    `gorm:"column:team_color"`
-	Icon         string    `gorm:"column:icon"`
-	URL          string    `gorm:"column:url"`
-	Jersey       string    `gorm:"column:jersey"`
-	Flag         string    `gorm:"column:flag"`
-	Status       bool      `gorm:"column:status;default:true"`
-	DateAdded    time.Time `gorm:"column:dateadded;autoCreateTime"`
+	TeamID       int       `gorm:"column:team_id;primaryKey;autoIncrement" json:"team_id"`
+	TeamName     string    `gorm:"column:team_name;not null" json:"team_name"`
+	TeamType     string    `gorm:"column:team_type;not null" json:"team_type"`
+	Filtername   string    `gorm:"column:filtername" json:"filtername"`
+	Abbreviation string    `gorm:"column:abbreviation;size:4" json:"abbreviation"`
+	TeamColor    string    `gorm:"column:team_color" json:"team_color"`
+	Icon         string    `gorm:"column:icon" json:"icon"`
+	URL          string    `gorm:"column:url" json:"url"`
+	Jersey       string    `gorm:"column:jersey" json:"jersey"`
+	Flag         string    `gorm:"column:flag" json:"flag"`
+	Status       bool      `gorm:"column:status;default:true" json:"status"`
+	DateAdded    time.Time `gorm:"column:dateadded;autoCreateTime" json:"date_added"`
 }
 
 type Venue struct {
-	VenueID      int       `gorm:"column:venue_id;primaryKey;autoIncrement"`
-	VenueName    string    `gorm:"column:venue_name;not null"`
-	Filtername   string    `gorm:"column:filtername"`
-	Friendlyname string    `gorm:"column:friendlyname"`
-	City         string    `gorm:"column:city"`
-	Country      string    `gorm:"column:country"`
-	State        string    `gorm:"column:state"`
-	StateAbbr    string    `gorm:"column:state_abbr;size:5"`
-	OfficialTeam string    `gorm:"column:official_team"`
-	Capacity     int       `gorm:"column:capacity"`
-	Dimensions   string    `gorm:"column:dimensions"`
-	Opened       int       `gorm:"column:opened"`
-	Description  string    `gorm:"column:description"`
-	Shortname    string    `gorm:"column:shortname"`
-	Timezone     string    `gorm:"column:timezone"`
-	Weather      string    `gorm:"column:weather"`
-	PitchType    string    `gorm:"column:pitch_type"`
-	DateAdded    time.Time `gorm:"column:dateadded;autoCreateTime"`
-	Status       bool      `gorm:"column:status;default:true"`
+	VenueID      int       `gorm:"column:venue_id;primaryKey;autoIncrement" json:"venue_id"`
+	VenueName    string    `gorm:"column:venue_name;not null" json:"venue_name"`
+	Filtername   string    `gorm:"column:filtername" json:"filtername"`
+	Friendlyname string    `gorm:"column:friendlyname" json:"friendlyname"`
+	City         string    `gorm:"column:city" json:"city"`
+	Country      string    `gorm:"column:country" json:"country"`
+	State        string    `gorm:"column:state" json:"state"`
+	StateAbbr    string    `gorm:"column:state_abbr;size:5" json:"state_abbr"`
+	OfficialTeam string    `gorm:"column:official_team" json:"official_team"`
+	Capacity     int       `gorm:"column:capacity" json:"capacity"`
+	Dimensions   string    `gorm:"column:dimensions" json:"dimensions"`
+	Opened       int       `gorm:"column:opened" json:"opened"`
+	Description  string    `gorm:"column:description" json:"description"`
+	Shortname    string    `gorm:"column:shortname" json:"shortname"`
+	Timezone     string    `gorm:"column:timezone" json:"timezone"`
+	Weather      string    `gorm:"column:weather" json:"weather"`
+	PitchType    string    `gorm:"column:pitch_type" json:"pitch_type"`
+	DateAdded    time.Time `gorm:"column:dateadded;autoCreateTime" json:"date_added"`
+	Status       bool      `gorm:"column:status;default:true" json:"status"`
 }
 
 type MatchStats struct {

@@ -1,0 +1,7 @@
+go run .\cmd\dataloader\ venue -league=odi
+go run .\cmd\dataloader\ player -league=odi
+go run .\cmd\dataloader\ team -league=odi
+go run .\cmd\dataloader\ match -league=odi
+go run .\cmd\dataloader\ matchstats -league=odi
+go run .\cmd\dataloader\ playerstats -league=odi
+go run .\cmd\dataloader\ scorecard -league=odi
