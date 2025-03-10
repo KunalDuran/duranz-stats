@@ -162,14 +162,14 @@ func GetMatchList(team, vsTeam int) []CricketMatch {
 	}
 
 	// get match stats for these matches
-	var matchIDs []string
+	var matchIDs []int
 	for _, match := range matchList {
-		matchIDs = append(matchIDs, strconv.Itoa(match.MatchID))
+		matchIDs = append(matchIDs, match.MatchID)
 	}
 
 	var matchStats []MatchStats
 	if err := DB.Model(&MatchStats{}).
-		Where("match_id IN (?)", strings.Join(matchIDs, ",")).
+		Where("match_id IN ?", matchIDs).
 		Find(&matchStats).Error; err != nil {
 		panic(err)
 	}
