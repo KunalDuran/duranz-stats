@@ -150,7 +150,7 @@ func GetTeamList() []string {
 func GetMatchList(team, vsTeam int) []CricketMatch {
 	var matchList []CricketMatch
 	if err := DB.Model(&CricketMatch{}).
-		Where("(home_team_id = ? AND away_team_id = ?) OR (home_team_id = ? AND away_team_id = ?)", team, vsTeam, team, vsTeam).
+		Where("(home_team_id = ? AND away_team_id = ?) OR (home_team_id = ? AND away_team_id = ?)", team, vsTeam, vsTeam, team).
 		Find(&matchList).Error; err != nil {
 		panic(err)
 	}
