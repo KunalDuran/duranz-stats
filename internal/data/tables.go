@@ -31,10 +31,15 @@ type CricketMatch struct {
 	ReserveUmpires    string    `gorm:"column:reserve_umpires;size:100" json:"reserve_umpires"`
 	TVUmpires         string    `gorm:"column:tv_umpires;size:100" json:"tv_umpires"`
 	Umpires           string    `gorm:"column:umpires;size:100" json:"umpires"`
+	EventName         string    `gorm:"column:event_name;size:100" json:"event_name"`
+	MatchNumber       int       `gorm:"column:match_number" json:"match_number"`
 	DateAdded         time.Time `gorm:"column:date_added;autoCreateTime" json:"date_added"`
 	LastUpdate        time.Time `gorm:"column:last_update;autoUpdateTime" json:"last_update"`
 	MatchEndTime      time.Time `gorm:"column:match_end_time" json:"match_end_time"`
 	Status            string    `gorm:"column:status;size:2" json:"status"`
+
+	// metadata
+	Scores map[int]string `gorm:"-" json:"scores"`
 }
 
 type CricketPlayer struct {

@@ -831,6 +831,8 @@ func MatchMapper(match models.Match, fileName string) {
 		ReserveUmpires:    reserveUmpires,
 		TVUmpires:         tvUmpires,
 		Umpires:           umpires,
+		EventName:         match.Info.Event.Name,
+		MatchNumber:       match.Info.Event.MatchNumber,
 	}
 
 	if len(match.Info.PlayerOfMatch) > 0 {

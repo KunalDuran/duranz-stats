@@ -22,3 +22,8 @@
 - Team @ Venue vs Team stats
 - Team @ Venue vs Team @ Venue stats
 - Spinners vs Pacers stats
+
+## checklist 
+- search matches by single team
+- individual match graphs (score progression, run rate progression and manhattan)
+- Head to head: Team and Player

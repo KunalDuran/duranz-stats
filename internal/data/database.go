@@ -160,6 +160,32 @@ func GetMatchList(team, vsTeam int) []CricketMatch {
 		Find(&matchList).Error; err != nil {
 		panic(err)
 	}
+
+	// get match stats for these matches
+	var matchIDs []string
+	for _, match := range matchList {
+		matchIDs = append(matchIDs, strconv.Itoa(match.MatchID))
+	}
+
+	var matchStats []MatchStats
+	if err := DB.Model(&MatchStats{}).
+		Where("match_id IN (?)", strings.Join(matchIDs, ",")).
+		Find(&matchStats).Error; err != nil {
+		panic(err)
+	}
+
+	for idx, match := range matchList {
+		for _, matchStat := range matchStats {
+			if match.MatchID == matchStat.MatchID {
+				scoreStr := fmt.Sprintf("%d/%d (%s)", matchStat.Score, matchStat.Wickets, matchStat.OversPlayed)
+				if match.Scores == nil {
+					match.Scores = make(map[int]string)
+				}
+				match.Scores[matchStat.TeamID] = scoreStr
+				matchList[idx].Scores = match.Scores
+			}
+		}
+	}
 	return matchList
 }
 
