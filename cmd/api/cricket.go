@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"os"
@@ -186,6 +187,7 @@ func TeamStats(w http.ResponseWriter, r *http.Request) {
 	vsTeam := utils.CleanText(r.URL.Query().Get("vsteam"), true)
 
 	teamID := data.GetTeamIDByTeamName(teamName)
+	log.Printf("fetching team stats for TeamName: %s, TeamID: %d, Gender: %s, Year: %s, Venue: %s, VsTeam: %s", teamName, teamID, gender, year, venue, vsTeam)
 	objAllTeamStats := data.GetTeamStats(teamID, gender, year, venue, vsTeam)
 	var teamStatistics models.DuranzTeamStats
 
