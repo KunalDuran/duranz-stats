@@ -43,7 +43,7 @@ func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []MatchStats
 	// Base query string
 	whereQuery := "(home_team_id = ? OR away_team_id = ?) AND ms.team_id = ? AND LOWER(gender) = ? AND matches.result != 'no result'"
 	if season == "" {
-		if _, err := strconv.Atoi(season); err == nil {
+		if _, err := strconv.Atoi(utils.CleanText(season, true)); err == nil {
 			whereQuery += " AND matches.season_id = " + season
 		}
 	}
