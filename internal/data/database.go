@@ -43,7 +43,7 @@ func GetTeamStats(teamID int, gender, season, venue, vsTeam string) []MatchStats
 	// Base query string
 	query := DB.Table("cricket_matches AS matches").
 		Joins("LEFT JOIN match_stats AS ms ON ms.match_id = matches.match_id").
-		Where("(home_team_id = ? OR away_team_id = ?) AND ms.team_id = ? AND LOWER(gender) = ? AND matches.result != 'no result'", teamID, teamID, teamID, utils.CleanText(gender, true))
+		Where("(home_team_id = ? OR away_team_id = ?) AND ms.team_id = ? AND LOWER(gender) = ? AND matches.result != 'no result' AND matches.season_id = ?", teamID, teamID, teamID, utils.CleanText(gender, true), utils.CleanText(season, true))
 
 	// Add venue filter if provided
 	if venue != "" {
