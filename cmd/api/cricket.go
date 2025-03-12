@@ -208,8 +208,8 @@ func TeamHeadToHead(w http.ResponseWriter, r *http.Request) {
 		if team == "" {
 			continue
 		}
+		log.Printf("fetching team stats for TeamName: %s, Gender: %s, Year: %s, Venue: %s", teamName, gender, year, venue)
 		teamID := data.GetTeamIDByTeamName(utils.CleanText(team, false))
-		log.Printf("fetching team stats for TeamName: %s, TeamID: %d, Gender: %s, Year: %s, Venue: %s", teamName, teamID, gender, year, venue)
 		objAllTeamStats := data.GetTeamStats(teamID, gender, year, venue, "")
 		teamStatistics[utils.CleanText(team, false)] = calculateTeamStats(objAllTeamStats, teamID)
 	}
