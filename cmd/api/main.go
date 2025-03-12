@@ -10,6 +10,7 @@ import (
 	"github.com/KunalDuran/duranz-stats/internal/cache"
 	"github.com/KunalDuran/duranz-stats/internal/data"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 )
@@ -56,6 +57,7 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+	router.Use(middleware.Logger)
 
 	addRouteHandlers(router)
 
