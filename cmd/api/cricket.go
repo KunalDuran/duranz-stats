@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -189,59 +188,31 @@ func TeamStats(w http.ResponseWriter, r *http.Request) {
 	teamID := data.GetTeamIDByTeamName(teamName)
 	log.Printf("fetching team stats for TeamName: %s, TeamID: %d, Gender: %s, Year: %s, Venue: %s, VsTeam: %s", teamName, teamID, gender, year, venue, vsTeam)
 	objAllTeamStats := data.GetTeamStats(teamID, gender, year, venue, vsTeam)
-	var teamStatistics models.DuranzTeamStats
+	teamStatistics := calculateTeamStats(objAllTeamStats, teamID)
+	final := utils.JSONMessageWrappedObj(http.StatusOK, teamStatistics)
+	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
+}
 
-	var totalScore int
-	for _, objTeam := range objAllTeamStats {
-		totalScore += objTeam.Score
-
-		if objTeam.Score > teamStatistics.HighestScore.Runs {
-			teamStatistics.HighestScore.Runs = objTeam.Score
-			teamStatistics.HighestScore.Match = objTeam.Match.MatchID
-		}
-
-		if objTeam.Score < teamStatistics.LowestScore.Runs || teamStatistics.LowestScore.Runs == 0 {
-			teamStatistics.LowestScore.Runs = objTeam.Score
-			teamStatistics.LowestScore.Match = objTeam.Match.MatchID
-		}
-
-		if objTeam.TossWinner == teamID {
-			teamStatistics.TossWin++
-		}
-
-		if objTeam.WinningTeam == teamID {
-			teamStatistics.MatchWin++
-
-			// count if team won while batting first or chasing first
-			if objTeam.TossWinner == teamID { // team won the toss
-				if objTeam.TossDecision == "bat" {
-					teamStatistics.BatFirstWin++
-				} else {
-					teamStatistics.ChasingWin++
-				}
-			} else {
-				if objTeam.TossDecision == "bat" { // other team won the toss
-					teamStatistics.ChasingWin++
-				} else {
-					teamStatistics.BatFirstWin++
-				}
-			}
-		}
+func TeamHeadToHead(w http.ResponseWriter, r *http.Request) {
+	teamName := chi.URLParam(r, "team")
+	gender := utils.CleanText(r.URL.Query().Get("gender"), true)
+	if gender == "" {
+		gender = "male"
 	}
+	year := utils.CleanText(r.URL.Query().Get("year"), true)
+	venue := utils.CleanText(r.URL.Query().Get("venue"), true)
 
-	teamStatistics.TotalMatches = len(objAllTeamStats)
-	if teamStatistics.TotalMatches > 0 {
-		teamStatistics.MatchWinPercent = utils.Round(float64(teamStatistics.MatchWin)/float64(teamStatistics.TotalMatches), 0.01, 2) * 100
-		teamStatistics.TossWinPercent = utils.Round(float64(teamStatistics.TossWin)/float64(teamStatistics.TotalMatches), 0.01, 2) * 100
-
-		teamStatistics.AvgScoreInn = utils.Round(float64(totalScore)/float64(teamStatistics.TotalMatches), 0.01, 2)
+	requestedTeams := strings.Split(teamName, ",")
+	teamStatistics := make(map[string]models.DuranzTeamStats)
+	for _, team := range requestedTeams[:5] {
+		if team == "" {
+			continue
+		}
+		teamID := data.GetTeamIDByTeamName(utils.CleanText(team, false))
+		log.Printf("fetching team stats for TeamName: %s, TeamID: %d, Gender: %s, Year: %s, Venue: %s", teamName, teamID, gender, year, venue)
+		objAllTeamStats := data.GetTeamStats(teamID, gender, year, venue, "")
+		teamStatistics[utils.CleanText(team, false)] = calculateTeamStats(objAllTeamStats, teamID)
 	}
-
-	if teamStatistics.MatchWin > 0 {
-		teamStatistics.ChasingWinPer = math.Round((float64(teamStatistics.ChasingWin)/float64(teamStatistics.MatchWin))*10000) / 100
-		teamStatistics.BatFirstWinPer = math.Round((float64(teamStatistics.BatFirstWin)/float64(teamStatistics.MatchWin))*10000) / 100
-	}
-
 	final := utils.JSONMessageWrappedObj(http.StatusOK, teamStatistics)
 	utils.WebResponseJSONObject(w, r, http.StatusOK, final)
 }
