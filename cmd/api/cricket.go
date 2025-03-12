@@ -204,8 +204,8 @@ func TeamHeadToHead(w http.ResponseWriter, r *http.Request) {
 
 	requestedTeams := strings.Split(teamName, ",")
 	teamStatistics := make(map[string]models.DuranzTeamStats)
-	for _, team := range requestedTeams[:5] {
-		if team == "" {
+	for idx, team := range requestedTeams {
+		if team == "" || idx > 5 {
 			continue
 		}
 		log.Printf("fetching team stats for TeamName: %s, Gender: %s, Year: %s, Venue: %s", teamName, gender, year, venue)
