@@ -194,7 +194,8 @@ func TeamStats(w http.ResponseWriter, r *http.Request) {
 }
 
 func TeamHeadToHead(w http.ResponseWriter, r *http.Request) {
-	teamName := chi.URLParam(r, "team")
+	teamName := r.URL.Query().Get("team")
+
 	log.Println("data requested for teams ", teamName)
 	gender := utils.CleanText(r.URL.Query().Get("gender"), true)
 	if gender == "" {
